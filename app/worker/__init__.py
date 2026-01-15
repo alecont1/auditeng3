@@ -17,10 +17,34 @@ from app.worker.broker import (
     broker,
 )
 
+# Import status tracking utilities
+from app.worker.status import (
+    JobInfo,
+    JobStatus,
+    create_job,
+    delete_job_status,
+    get_job_status,
+    set_job_status,
+)
+
+# Import task utilities
+from app.worker.tasks import base_task, enqueue_task
+
 __all__ = [
+    # Broker
     "broker",
     "QUEUES",
     "DEFAULT_QUEUE",
     "HIGH_PRIORITY_QUEUE",
     "LOW_PRIORITY_QUEUE",
+    # Status
+    "JobStatus",
+    "JobInfo",
+    "create_job",
+    "set_job_status",
+    "get_job_status",
+    "delete_job_status",
+    # Tasks
+    "base_task",
+    "enqueue_task",
 ]
