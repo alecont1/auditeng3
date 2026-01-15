@@ -8,6 +8,16 @@ from app.schemas.enums import (
     TaskStatus,
     TestType,
 )
+from app.schemas.user import User, UserBase, UserCreate, UserInDB
+from app.schemas.task import Task, TaskBase, TaskCreate
+from app.schemas.analysis import (
+    Analysis,
+    AnalysisBase,
+    AnalysisCreate,
+    ExtractionResult,
+    ValidationResult,
+)
+from app.schemas.finding import Finding, FindingBase, FindingCreate, FindingEvidence
 
 __all__ = [
     # Base
@@ -20,4 +30,24 @@ __all__ = [
     "FindingSeverity",
     "EquipmentType",
     "TestType",
+    # User
+    "UserBase",
+    "UserCreate",
+    "UserInDB",
+    "User",
+    # Task
+    "TaskBase",
+    "TaskCreate",
+    "Task",
+    # Analysis
+    "AnalysisBase",
+    "AnalysisCreate",
+    "Analysis",
+    "ExtractionResult",
+    "ValidationResult",
+    # Finding
+    "FindingBase",
+    "FindingCreate",
+    "Finding",
+    "FindingEvidence",
 ]
