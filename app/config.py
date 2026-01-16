@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # CORS configuration - explicit origins only, no wildcards
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
+    # File upload configuration
+    UPLOAD_DIR: str = "./uploads"
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
