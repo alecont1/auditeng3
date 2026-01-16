@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-01-15)
 ## Current Position
 
 Phase: 5 of 6 (API & Findings)
-Plan: 1 of 4 complete in current phase
+Plan: 2 of 4 complete in current phase
 Status: In progress
-Last activity: 2026-01-16 — Completed 05-01-PLAN.md
+Last activity: 2026-01-16 — Completed 05-02-PLAN.md
 
-Progress: ██████▓░░░ 68%
+Progress: ███████░░░ 71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
+- Total plans completed: 20
 - Average duration: —
 - Total execution time: —
 
@@ -31,10 +31,10 @@ Progress: ██████▓░░░ 68%
 | 2. Extraction Pipeline | 6/6 | Complete | — |
 | 3. Validation Engine | 6/6 | Complete | — |
 | 4. Standards Configuration | 1/1 | Complete | 5min |
-| 5. API & Findings | 1/4 | In progress | 5min |
+| 5. API & Findings | 2/4 | In progress | 6.5min |
 
 **Recent Trend:**
-- Last 5 plans: 03-04, 03-05, 03-06, 04-01, 05-01
+- Last 5 plans: 03-05, 03-06, 04-01, 05-01, 05-02
 - Trend: Stable
 
 ## Accumulated Context
@@ -57,6 +57,8 @@ Recent decisions affecting current work:
 - Auto-fill standard_reference via BaseValidator._get_default_reference()
 - python-jose over PyJWT for JWT (better algorithm support)
 - OAuth2PasswordRequestForm for standard OAuth2 login flow
+- Static methods on service classes (FindingService, VerdictService) for stateless ops
+- N/A default for missing standard_reference in finding evidence
 
 ### Pending Todos
 
@@ -69,5 +71,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 05-01-PLAN.md (JWT Authentication)
+Stopped at: Completed 05-02-PLAN.md (Finding and Verdict Services)
 Resume file: None

@@ -122,11 +122,9 @@ Plans:
 
 Plans:
 - [x] 05-01: Authentication endpoints (JWT)
-- [ ] 05-02: Document submission API
+- [x] 05-02: Finding and verdict services
 - [ ] 05-03: Status and results endpoints
-- [ ] 05-04: Finding generation service
-- [ ] 05-05: Scoring and verdict logic
-- [ ] 05-06: Rate limiting and OpenAPI docs
+- [ ] 05-04: Rate limiting and OpenAPI docs
 
 ### Phase 6: Reporting & Audit
 **Goal**: Generate professional PDF reports with findings summaries and maintain complete audit trails for compliance
@@ -163,10 +161,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Extraction Pipeline | 6/6 | Complete | 2026-01-15 |
 | 3. Validation Engine | 6/6 | Complete | 2026-01-15 |
 | 4. Standards Configuration | 1/1 | Complete | 2026-01-16 |
-| 5. API & Findings | 1/6 | In progress | - |
+| 5. API & Findings | 2/4 | In progress | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 19/28 plans complete (68%)
+**Total:** 20/26 plans complete (77%)
 
 ---
 *Roadmap created: 2026-01-15*
