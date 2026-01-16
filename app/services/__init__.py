@@ -13,6 +13,15 @@ from app.services.extraction import (
     get_extractor,
     process_document,
 )
+from app.services.finding import (
+    FindingService,
+    generate_findings_from_validation,
+)
+from app.services.verdict import (
+    VerdictService,
+    compute_compliance_score,
+    compute_verdict,
+)
 
 __all__ = [
     # Storage
@@ -26,4 +35,11 @@ __all__ = [
     "extract_pdf_text",
     "get_extractor",
     "process_document",
+    # Finding
+    "FindingService",
+    "generate_findings_from_validation",
+    # Verdict
+    "VerdictService",
+    "compute_compliance_score",
+    "compute_verdict",
 ]
