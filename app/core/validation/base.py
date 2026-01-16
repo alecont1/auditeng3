@@ -14,6 +14,7 @@ from app.core.extraction.schemas import BaseExtractionResult
 from app.core.validation.config import ValidationConfig, get_validation_config
 from app.core.validation.schemas import (
     Finding,
+    RuleEvaluation,
     ValidationResult,
     ValidationSeverity,
 )
@@ -87,6 +88,29 @@ class BaseValidator(ABC):
         }
         return ref_map.get(self.test_type, f"{self.standard.value.upper()} Standard")
 
+    def track_rule(
+        self,
+        rules: list[RuleEvaluation],
+        rule_id: str,
+        passed: bool,
+        details: dict | None = None,
+    ) -> None:
+        """Track a rule evaluation (passed or failed).
+
+        Args:
+            rules: List to append the evaluation to.
+            rule_id: Unique rule identifier.
+            passed: Whether the rule passed.
+            details: Optional context (threshold, extracted_value).
+        """
+        rules.append(
+            RuleEvaluation(
+                rule_id=rule_id,
+                passed=passed,
+                details=details,
+            )
+        )
+
     def add_finding(
         self,
         findings: list[Finding],
@@ -98,8 +122,11 @@ class BaseValidator(ABC):
         threshold: Any,
         standard_reference: str | None = None,
         remediation: str | None = None,
+        rules_evaluated: list[RuleEvaluation] | None = None,
     ) -> None:
         """Helper to add a finding to the list.
+
+        Also tracks the rule as failed in rules_evaluated if provided.
 
         Args:
             findings: List to append the finding to.
@@ -112,6 +139,7 @@ class BaseValidator(ABC):
             standard_reference: Optional standard reference. If None, uses
                               config's reference for this test type.
             remediation: Optional suggested fix.
+            rules_evaluated: Optional list to track the rule evaluation.
         """
         # Use config's reference as default if none provided
         if standard_reference is None:
@@ -130,16 +158,27 @@ class BaseValidator(ABC):
             )
         )
 
+        # Track the rule as failed if rules_evaluated list is provided
+        if rules_evaluated is not None:
+            self.track_rule(
+                rules_evaluated,
+                rule_id,
+                passed=False,
+                details={"threshold": threshold, "extracted_value": extracted_value},
+            )
+
     def create_result(
         self,
         findings: list[Finding],
         equipment_tag: str | None = None,
+        rules_evaluated: list[RuleEvaluation] | None = None,
     ) -> ValidationResult:
         """Create a ValidationResult from findings.
 
         Args:
             findings: List of validation findings.
             equipment_tag: Optional equipment identifier.
+            rules_evaluated: Optional list of all rule evaluations.
 
         Returns:
             ValidationResult with summary calculated.
@@ -148,4 +187,5 @@ class BaseValidator(ABC):
             test_type=self.test_type,
             equipment_tag=equipment_tag,
             findings=findings,
+            rules_evaluated=rules_evaluated or [],
         )
