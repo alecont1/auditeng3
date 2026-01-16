@@ -1,6 +1,6 @@
 """Report schema definitions for PDF generation."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
@@ -52,5 +52,6 @@ class ReportData(BaseSchema):
         default_factory=list, description="List of findings for the report"
     )
     generated_at: datetime = Field(
-        default_factory=datetime.utcnow, description="Report generation timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Report generation timestamp",
     )

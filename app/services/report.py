@@ -4,7 +4,7 @@ Generates PDF reports from Analysis data with executive summary,
 findings table, and standard references.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 from typing import TYPE_CHECKING
 
@@ -36,18 +36,20 @@ class ReportService:
     """
 
     # Severity color mapping (light backgrounds for readability)
+    # Note: Keys are strings because BaseSchema uses use_enum_values=True
     SEVERITY_COLORS = {
-        FindingSeverity.CRITICAL: colors.Color(1, 0.8, 0.8),  # Light red
-        FindingSeverity.MAJOR: colors.Color(1, 0.95, 0.8),  # Light yellow
-        FindingSeverity.MINOR: colors.white,
-        FindingSeverity.INFO: colors.white,
+        "critical": colors.Color(1, 0.8, 0.8),  # Light red
+        "major": colors.Color(1, 0.95, 0.8),  # Light yellow
+        "minor": colors.white,
+        "info": colors.white,
     }
 
     # Verdict color mapping
+    # Note: Keys are strings because BaseSchema uses use_enum_values=True
     VERDICT_COLORS = {
-        AnalysisVerdict.APPROVED: colors.Color(0.2, 0.7, 0.2),  # Green
-        AnalysisVerdict.REVIEW: colors.Color(0.9, 0.7, 0.1),  # Yellow/Orange
-        AnalysisVerdict.REJECTED: colors.Color(0.8, 0.2, 0.2),  # Red
+        "approved": colors.Color(0.2, 0.7, 0.2),  # Green
+        "review": colors.Color(0.9, 0.7, 0.1),  # Yellow/Orange
+        "rejected": colors.Color(0.8, 0.2, 0.2),  # Red
     }
 
     @staticmethod
@@ -110,7 +112,7 @@ class ReportService:
             confidence_score=analysis.confidence_score,
             severity_counts=severity_counts,
             findings=findings_list,
-            generated_at=datetime.utcnow(),
+            generated_at=datetime.now(timezone.utc),
         )
 
     @staticmethod
@@ -179,7 +181,8 @@ class ReportService:
         story.append(Paragraph("Executive Summary", heading_style))
 
         # Verdict badge
-        verdict_text = data.verdict.value.upper() if data.verdict else "PENDING"
+        # Note: verdict is a string due to use_enum_values=True in BaseSchema
+        verdict_text = data.verdict.upper() if data.verdict else "PENDING"
         verdict_color = (
             ReportService.VERDICT_COLORS.get(data.verdict, colors.gray)
             if data.verdict
@@ -278,10 +281,11 @@ class ReportService:
                 if len(remediation) > 150:
                     remediation = remediation[:150] + "..."
 
+                # Note: severity is a string due to use_enum_values=True in BaseSchema
                 findings_data.append(
                     [
                         finding.rule_id,
-                        finding.severity.value.upper(),
+                        finding.severity.upper(),
                         Paragraph(message, wrap_style),
                         Paragraph(remediation, wrap_style),
                         finding.standard_reference,
