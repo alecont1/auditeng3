@@ -60,6 +60,10 @@ tags_metadata = [
         "name": "reports",
         "description": "PDF report generation and download.",
     },
+    {
+        "name": "audit",
+        "description": "Audit trail retrieval for compliance verification.",
+    },
 ]
 
 # OpenAPI description with markdown
@@ -204,6 +208,7 @@ def create_app() -> FastAPI:
     from app.api.tasks import router as tasks_router
     from app.api.validation import router as validation_router
     from app.api.reports import router as reports_router
+    from app.api.audit import router as audit_router
 
     app.include_router(analyses_router)
     app.include_router(auth_router)
@@ -212,6 +217,7 @@ def create_app() -> FastAPI:
     app.include_router(tasks_router)
     app.include_router(validation_router)
     app.include_router(reports_router)
+    app.include_router(audit_router)
 
     # Register exception handlers
     from app.core.exceptions import (
