@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # File upload configuration
     UPLOAD_DIR: str = "./uploads"
 
+    # Anthropic API configuration
+    ANTHROPIC_API_KEY: str = ""
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
