@@ -121,7 +121,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: Authentication endpoints (JWT)
+- [x] 05-01: Authentication endpoints (JWT)
 - [ ] 05-02: Document submission API
 - [ ] 05-03: Status and results endpoints
 - [ ] 05-04: Finding generation service
@@ -163,10 +163,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Extraction Pipeline | 6/6 | Complete | 2026-01-15 |
 | 3. Validation Engine | 6/6 | Complete | 2026-01-15 |
 | 4. Standards Configuration | 1/1 | Complete | 2026-01-16 |
-| 5. API & Findings | 0/6 | Not started | - |
+| 5. API & Findings | 1/6 | In progress | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 18/28 plans complete (64%)
+**Total:** 19/28 plans complete (68%)
 
 ---
 *Roadmap created: 2026-01-15*
