@@ -33,6 +33,10 @@ settings = get_settings()
 # OpenAPI tags metadata for grouping endpoints
 tags_metadata = [
     {
+        "name": "analyses",
+        "description": "Analysis submission, status polling, and results retrieval with authentication.",
+    },
+    {
         "name": "health",
         "description": "Health check endpoints for monitoring and orchestration (liveness, readiness probes).",
     },
