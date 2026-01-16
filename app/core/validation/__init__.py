@@ -18,6 +18,7 @@ from app.core.validation.base import BaseValidator
 from app.core.validation.calibration import CalibrationValidator
 from app.core.validation.config import (
     CalibrationConfig,
+    FATConfig,
     GroundingThresholds,
     MeggerThresholds,
     ThermographyThresholds,
@@ -25,6 +26,7 @@ from app.core.validation.config import (
     get_validation_config,
 )
 from app.core.validation.cross_field import CrossFieldValidator
+from app.core.validation.fat import FATValidator
 from app.core.validation.grounding import GroundingValidator
 from app.core.validation.megger import MeggerValidator
 from app.core.validation.orchestrator import ValidationOrchestrator, validate_extraction
@@ -43,6 +45,7 @@ __all__ = [
     "GroundingValidator",
     "MeggerValidator",
     "ThermographyValidator",
+    "FATValidator",
     "CalibrationValidator",
     "CrossFieldValidator",
     # Orchestration
@@ -55,6 +58,7 @@ __all__ = [
     "ValidationSeverity",
     # Config
     "CalibrationConfig",
+    "FATConfig",
     "GroundingThresholds",
     "MeggerThresholds",
     "ThermographyThresholds",

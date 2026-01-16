@@ -13,6 +13,14 @@ from app.core.extraction.client import (
     get_instructor_client,
 )
 from app.core.extraction.base import BaseExtractor
+from app.core.extraction.fat import (
+    FATChecklistItem,
+    FATExtractionResult,
+    FATExtractor,
+    FATSignature,
+    FATSpecification,
+    FATTestConditions,
+)
 from app.core.extraction.grounding import (
     GroundingExtractionResult,
     GroundingExtractor,
@@ -45,6 +53,13 @@ from app.core.extraction.schemas import (
 __all__ = [
     # Base
     "BaseExtractor",
+    # FAT
+    "FATChecklistItem",
+    "FATExtractionResult",
+    "FATExtractor",
+    "FATSignature",
+    "FATSpecification",
+    "FATTestConditions",
     # Grounding
     "GroundingExtractionResult",
     "GroundingExtractor",

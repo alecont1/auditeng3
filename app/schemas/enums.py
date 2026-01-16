@@ -45,3 +45,4 @@ class TestType(StrEnum):
     GROUNDING = "grounding"
     MEGGER = "megger"
     THERMOGRAPHY = "thermography"
+    FAT = "fat"  # Factory Acceptance Test

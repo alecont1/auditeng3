@@ -3,6 +3,7 @@
 Coordinates all validators to produce complete validation results.
 """
 
+from app.core.extraction.fat import FATExtractionResult
 from app.core.extraction.grounding import GroundingExtractionResult
 from app.core.extraction.megger import MeggerExtractionResult
 from app.core.extraction.schemas import BaseExtractionResult
@@ -10,6 +11,7 @@ from app.core.extraction.thermography import ThermographyExtractionResult
 from app.core.validation.calibration import CalibrationValidator
 from app.core.validation.config import ValidationConfig, get_validation_config
 from app.core.validation.cross_field import CrossFieldValidator
+from app.core.validation.fat import FATValidator
 from app.core.validation.grounding import GroundingValidator
 from app.core.validation.megger import MeggerValidator
 from app.core.validation.schemas import Finding, ValidationResult
@@ -36,6 +38,7 @@ class ValidationOrchestrator:
         self.grounding_validator = GroundingValidator(self.config)
         self.megger_validator = MeggerValidator(self.config)
         self.thermography_validator = ThermographyValidator(self.config)
+        self.fat_validator = FATValidator(self.config)
         self.calibration_validator = CalibrationValidator(self.config)
         self.cross_field_validator = CrossFieldValidator(self.config)
 
@@ -68,10 +71,16 @@ class ValidationOrchestrator:
             result = self.thermography_validator.validate(extraction)
             all_findings.extend(result.findings)
             equipment_tag = result.equipment_tag
+        elif isinstance(extraction, FATExtractionResult):
+            test_type = "fat"
+            result = self.fat_validator.validate(extraction)
+            all_findings.extend(result.findings)
+            equipment_tag = result.equipment_tag
 
-        # Apply calibration validation
-        calib_result = self.calibration_validator.validate(extraction)
-        all_findings.extend(calib_result.findings)
+        # Apply calibration validation (not for FAT which has its own handling)
+        if not isinstance(extraction, FATExtractionResult):
+            calib_result = self.calibration_validator.validate(extraction)
+            all_findings.extend(calib_result.findings)
 
         # Apply cross-field validation
         cross_result = self.cross_field_validator.validate(extraction)
@@ -82,6 +91,30 @@ class ValidationOrchestrator:
             equipment_tag=equipment_tag,
             findings=all_findings,
         )
+
+    def calculate_compliance_score(self, result: ValidationResult) -> float:
+        """Calculate compliance score from validation result.
+
+        Score calculation:
+        - Start at 100%
+        - CRITICAL finding: -25%
+        - MAJOR finding: -10%
+        - MINOR finding: -2%
+        - INFO finding: 0%
+
+        Args:
+            result: ValidationResult to score.
+
+        Returns:
+            float: Compliance score (0-100).
+        """
+        score = 100.0
+
+        score -= result.critical_count * 25
+        score -= result.major_count * 10
+        score -= result.minor_count * 2
+
+        return max(0.0, score)
 
 
 def validate_extraction(extraction: BaseExtractionResult) -> ValidationResult:
