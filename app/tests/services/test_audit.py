@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 from app.db.base import Base
 from app.db.models import Analysis, AuditLog, Task, User
+from app.core.validation.schemas import RuleEvaluation, ValidationResult
 from app.services.audit import AuditService, EventType, log_event
 
 
@@ -312,3 +313,105 @@ class TestAuditService:
         trail = await AuditService.get_audit_trail(db_session, test_analysis.id)
         assert len(trail) == 1
         assert trail[0].id == log.id
+
+
+class TestValidationRuleLogging:
+    """Tests for validation rule logging integration."""
+
+    @pytest.mark.asyncio
+    async def test_validation_rules_logged_during_extraction(
+        self, db_session: AsyncSession, test_analysis: Analysis
+    ) -> None:
+        """Simulate validation with rules_evaluated and verify audit logging.
+
+        This test verifies that both passed and failed rules are logged
+        to the audit trail via AuditService.log_validation_rule().
+        """
+        # Create a ValidationResult with both passed and failed rules
+        rules_evaluated = [
+            RuleEvaluation(
+                rule_id="GRND-001",
+                passed=True,
+                details={"threshold": 5.0, "extracted_value": 3.2},
+            ),
+            RuleEvaluation(
+                rule_id="GRND-002",
+                passed=False,
+                details={"threshold": 25.0, "extracted_value": 30.5},
+            ),
+            RuleEvaluation(
+                rule_id="GRND-003",
+                passed=True,
+                details={"threshold": 10.0, "extracted_value": 8.0},
+            ),
+        ]
+
+        validation_result = ValidationResult(
+            test_type="grounding",
+            equipment_tag="PANEL-01",
+            rules_evaluated=rules_evaluated,
+        )
+
+        # Simulate the extraction worker logging each rule
+        for rule_eval in validation_result.rules_evaluated:
+            await AuditService.log_validation_rule(
+                db=db_session,
+                analysis_id=test_analysis.id,
+                rule_id=rule_eval.rule_id,
+                passed=rule_eval.passed,
+                details=rule_eval.details,
+            )
+        await db_session.commit()
+
+        # Query audit logs for VALIDATION_RULE_APPLIED events
+        trail = await AuditService.get_audit_trail(db_session, test_analysis.id)
+        rule_logs = [
+            log for log in trail if log.event_type == EventType.VALIDATION_RULE_APPLIED
+        ]
+
+        # Assert all rules are logged
+        assert len(rule_logs) == 3
+
+        # Verify passed and failed rules are both present
+        rule_ids = {log.rule_id for log in rule_logs}
+        assert rule_ids == {"GRND-001", "GRND-002", "GRND-003"}
+
+        # Verify passed/failed status is captured
+        for log in rule_logs:
+            if log.rule_id == "GRND-001":
+                assert log.details["passed"] is True
+                assert log.details["threshold"] == 5.0
+            elif log.rule_id == "GRND-002":
+                assert log.details["passed"] is False
+                assert log.details["threshold"] == 25.0
+            elif log.rule_id == "GRND-003":
+                assert log.details["passed"] is True
+
+    @pytest.mark.asyncio
+    async def test_rules_evaluated_empty_no_logs(
+        self, db_session: AsyncSession, test_analysis: Analysis
+    ) -> None:
+        """Verify no rule logs created when rules_evaluated is empty."""
+        validation_result = ValidationResult(
+            test_type="grounding",
+            rules_evaluated=[],
+        )
+
+        # Simulate extraction worker with no rules
+        for rule_eval in validation_result.rules_evaluated:
+            await AuditService.log_validation_rule(
+                db=db_session,
+                analysis_id=test_analysis.id,
+                rule_id=rule_eval.rule_id,
+                passed=rule_eval.passed,
+                details=rule_eval.details,
+            )
+        await db_session.commit()
+
+        # Query audit logs
+        trail = await AuditService.get_audit_trail(db_session, test_analysis.id)
+        rule_logs = [
+            log for log in trail if log.event_type == EventType.VALIDATION_RULE_APPLIED
+        ]
+
+        assert len(rule_logs) == 0
