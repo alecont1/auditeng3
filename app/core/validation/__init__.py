@@ -10,9 +10,12 @@ Key components:
 - Finding: Individual validation finding with evidence
 - ValidationSeverity: Severity levels (CRITICAL, MAJOR, MINOR, INFO)
 - ValidationConfig: Externalized thresholds configuration
+- ValidationOrchestrator: Coordinates all validators
+- validate_extraction: Convenience function
 """
 
 from app.core.validation.base import BaseValidator
+from app.core.validation.calibration import CalibrationValidator
 from app.core.validation.config import (
     CalibrationConfig,
     GroundingThresholds,
@@ -21,16 +24,30 @@ from app.core.validation.config import (
     ValidationConfig,
     get_validation_config,
 )
+from app.core.validation.cross_field import CrossFieldValidator
+from app.core.validation.grounding import GroundingValidator
+from app.core.validation.megger import MeggerValidator
+from app.core.validation.orchestrator import ValidationOrchestrator, validate_extraction
 from app.core.validation.schemas import (
     Finding,
     ValidationResult,
     ValidationRule,
     ValidationSeverity,
 )
+from app.core.validation.thermography import ThermographyValidator
 
 __all__ = [
     # Base
     "BaseValidator",
+    # Validators
+    "GroundingValidator",
+    "MeggerValidator",
+    "ThermographyValidator",
+    "CalibrationValidator",
+    "CrossFieldValidator",
+    # Orchestration
+    "ValidationOrchestrator",
+    "validate_extraction",
     # Schemas
     "Finding",
     "ValidationResult",
