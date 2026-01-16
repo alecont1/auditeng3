@@ -54,16 +54,34 @@ class Finding(BaseModel):
     remediation: str | None = None
 
 
+class RuleEvaluation(BaseModel):
+    """Record of a single rule evaluation (passed or failed).
+
+    Used to track all rule checks for compliance auditing.
+    Both passed and failed rules are recorded.
+
+    Attributes:
+        rule_id: Unique rule identifier (e.g., "GRND-001").
+        passed: Whether the rule passed.
+        details: Optional context (threshold, extracted_value, etc.).
+    """
+
+    rule_id: str
+    passed: bool
+    details: dict | None = None
+
+
 class ValidationResult(BaseModel):
     """Complete validation result for an extraction.
 
     Contains all findings from validating an extraction result,
-    plus summary counts for each severity level.
+    plus summary counts for each severity level and rule evaluations.
 
     Attributes:
         test_type: Type of test validated (grounding, megger, thermography).
         equipment_tag: Equipment identifier if available.
-        findings: List of validation findings.
+        findings: List of validation findings (failed rules).
+        rules_evaluated: List of all rule evaluations (passed and failed).
         is_valid: True if no CRITICAL findings.
         critical_count: Count of CRITICAL findings.
         major_count: Count of MAJOR findings.
@@ -74,6 +92,7 @@ class ValidationResult(BaseModel):
     test_type: str
     equipment_tag: str | None = None
     findings: list[Finding] = Field(default_factory=list)
+    rules_evaluated: list[RuleEvaluation] = Field(default_factory=list)
 
     # Derived summary (calculated in model_post_init)
     is_valid: bool = True
