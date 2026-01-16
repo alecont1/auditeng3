@@ -2,7 +2,7 @@
 
 This module provides the Dramatiq actor for processing uploaded documents
 through the extraction pipeline with retry logic and status tracking.
-Includes automatic validation of extraction results.
+Includes automatic validation of extraction results with finding generation.
 """
 
 import asyncio
@@ -12,10 +12,12 @@ from uuid import UUID
 
 import dramatiq
 
-from app.db.models import Analysis, Finding, Task
+from app.db.models import Analysis, Task
 from app.db.session import async_session_factory
 from app.schemas.enums import TaskStatus, TestType
 from app.services.extraction import process_document
+from app.services.finding import FindingService
+from app.services.verdict import VerdictService
 from app.core.validation import ValidationOrchestrator
 from app.worker.broker import broker
 from app.worker.status import JobStatus, set_job_status
@@ -123,31 +125,28 @@ async def _process_document_async(task_id: str) -> None:
             # 5. Run validation on extraction result
             orchestrator = ValidationOrchestrator()
             validation_result = orchestrator.validate(result)
-            compliance_score = orchestrator.calculate_compliance_score(validation_result)
 
-            # Determine verdict based on validation result
-            if validation_result.is_valid:
-                verdict = "APPROVED"
-            elif validation_result.critical_count > 0:
-                verdict = "REJECTED"
-            else:
-                verdict = "NEEDS_REVIEW"
+            # 6. Generate findings and compute verdict using services
+            verdict, compliance_score, confidence_score = (
+                VerdictService.compute_analysis_verdict(validation_result, result)
+            )
 
             logger.info(
-                f"Task {task_id} validated: verdict={verdict}, "
+                f"Task {task_id} validated: verdict={verdict.value}, "
                 f"compliance_score={compliance_score:.1f}%, "
+                f"confidence_score={confidence_score:.2f}, "
                 f"findings={len(validation_result.findings)}"
             )
 
-            # 6. Create Analysis record with validation results
+            # 7. Create Analysis record with validation results
             analysis = Analysis(
                 task_id=task_uuid,
                 equipment_type=equipment_type or "unknown",
                 test_type=test_type_str or "unknown",
                 equipment_tag=equipment_tag,
-                verdict=verdict,
+                verdict=verdict.value,
                 compliance_score=compliance_score,
-                confidence_score=result.overall_confidence,
+                confidence_score=confidence_score,
                 extraction_result={
                     "raw_data": result.model_dump(mode="json"),
                     "extraction_errors": result.extraction_errors,
@@ -165,19 +164,13 @@ async def _process_document_async(task_id: str) -> None:
             session.add(analysis)
             await session.flush()  # Get analysis.id before creating findings
 
-            # 7. Create Finding records for each validation finding
-            for finding in validation_result.findings:
-                db_finding = Finding(
-                    analysis_id=analysis.id,
-                    severity=finding.severity.value,
-                    rule_id=finding.rule_id,
-                    message=finding.message,
-                    evidence=finding.evidence,
-                    remediation=finding.remediation,
-                )
-                session.add(db_finding)
+            # 8. Generate and persist findings using FindingService
+            finding_creates = FindingService.generate_findings_from_validation(
+                validation_result, analysis.id
+            )
+            await FindingService.persist_findings(session, finding_creates)
 
-            # 8. Update task status
+            # 9. Update task status
             task.status = TaskStatus.COMPLETED.value
             await session.commit()
 
@@ -186,16 +179,16 @@ async def _process_document_async(task_id: str) -> None:
                 JobStatus.COMPLETED,
                 result={
                     "analysis_id": str(analysis.id),
-                    "verdict": verdict,
+                    "verdict": verdict.value,
                     "compliance_score": compliance_score,
-                    "needs_review": result.needs_review or verdict == "NEEDS_REVIEW",
-                    "confidence_score": result.overall_confidence,
+                    "needs_review": result.needs_review or verdict.value == "review",
+                    "confidence_score": confidence_score,
                     "findings_count": len(validation_result.findings),
                 },
             )
             logger.info(
                 f"Task {task_id} completed: analysis_id={analysis.id}, "
-                f"verdict={verdict}, compliance={compliance_score:.1f}%"
+                f"verdict={verdict.value}, compliance={compliance_score:.1f}%"
             )
 
         except Exception as e:
