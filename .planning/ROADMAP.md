@@ -11,7 +11,7 @@ Build an automated electrical commissioning report validation system following t
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation** - Data models, database setup, and background job infrastructure
-- [ ] **Phase 2: Extraction Pipeline** - Document upload and AI extraction with Claude + Instructor
+- [x] **Phase 2: Extraction Pipeline** - Document upload and AI extraction with Claude + Instructor
 - [ ] **Phase 3: Validation Engine** - Deterministic validation rules against NETA/IEEE standards
 - [ ] **Phase 4: RAG Pipeline** - Technical standards indexing and retrieval with pgvector
 - [ ] **Phase 5: API & Findings** - REST API endpoints and finding/verdict generation
@@ -61,7 +61,7 @@ Plans:
 - [x] 02-03: Grounding test extraction schema
 - [x] 02-04: Megger test extraction schema
 - [x] 02-05: Thermography extraction with Vision
-- [ ] 02-06: Confidence scoring and retry logic
+- [x] 02-06: Confidence scoring and retry logic
 
 ### Phase 3: Validation Engine
 **Goal**: Extracted data is validated deterministically against NETA/IEEE standards with consistent, reproducible results
@@ -165,13 +165,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-01-15 |
-| 2. Extraction Pipeline | 5/6 | In progress | - |
+| 2. Extraction Pipeline | 6/6 | Complete | 2026-01-15 |
 | 3. Validation Engine | 0/6 | Not started | - |
 | 4. RAG Pipeline | 0/5 | Not started | - |
 | 5. API & Findings | 0/6 | Not started | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 10/32 plans complete (31%)
+**Total:** 11/32 plans complete (34%)
 
 ---
 *Roadmap created: 2026-01-15*
