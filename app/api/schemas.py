@@ -66,3 +66,28 @@ class AnalysisResponse(BaseModel):
     created_at: datetime = Field(..., description="When the analysis was created")
 
     model_config = {"from_attributes": True}
+
+
+class AuditEventResponse(BaseModel):
+    """Response model for a single audit event."""
+
+    id: UUID = Field(..., description="Unique identifier for the audit log entry")
+    event_type: str = Field(..., description="Type of event (extraction_started, validation_rule_applied, etc.)")
+    event_timestamp: datetime = Field(..., description="When the event occurred")
+    details: dict[str, Any] | None = Field(None, description="Event-specific data")
+    model_version: str | None = Field(None, description="Claude model version used")
+    prompt_version: str | None = Field(None, description="Internal prompt version used")
+    confidence_score: float | None = Field(None, ge=0, le=1, description="Extraction confidence score")
+    rule_id: str | None = Field(None, description="Validation rule ID if applicable")
+
+    model_config = {"from_attributes": True}
+
+
+class AuditTrailResponse(BaseModel):
+    """Response model for complete audit trail."""
+
+    analysis_id: UUID = Field(..., description="Analysis ID the audit trail belongs to")
+    event_count: int = Field(..., ge=0, description="Number of events in the trail")
+    events: list[AuditEventResponse] = Field(default_factory=list, description="Chronological list of audit events")
+
+    model_config = {"from_attributes": True}
