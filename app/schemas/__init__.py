@@ -18,6 +18,13 @@ from app.schemas.analysis import (
     ValidationResult,
 )
 from app.schemas.finding import Finding, FindingBase, FindingCreate, FindingEvidence
+from app.schemas.upload import (
+    AllowedFileType,
+    ALLOWED_EXTENSIONS,
+    MAX_FILE_SIZE,
+    UploadError,
+    UploadResponse,
+)
 
 __all__ = [
     # Base
@@ -50,4 +57,10 @@ __all__ = [
     "FindingCreate",
     "Finding",
     "FindingEvidence",
+    # Upload
+    "AllowedFileType",
+    "ALLOWED_EXTENSIONS",
+    "MAX_FILE_SIZE",
+    "UploadError",
+    "UploadResponse",
 ]
