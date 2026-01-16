@@ -26,6 +26,14 @@ from app.core.extraction.megger import (
     MeggerMeasurement,
     MeggerTestConditions,
 )
+from app.core.extraction.thermography import (
+    Hotspot,
+    HotspotSeverity,
+    ThermalImageData,
+    ThermographyExtractionResult,
+    ThermographyExtractor,
+    ThermographyTestConditions,
+)
 from app.core.extraction.schemas import (
     BaseExtractionResult,
     CalibrationInfo,
@@ -48,6 +56,13 @@ __all__ = [
     "MeggerExtractor",
     "MeggerMeasurement",
     "MeggerTestConditions",
+    # Thermography
+    "Hotspot",
+    "HotspotSeverity",
+    "ThermalImageData",
+    "ThermographyExtractionResult",
+    "ThermographyExtractor",
+    "ThermographyTestConditions",
     # Client
     "DEFAULT_MODEL",
     "MAX_RETRIES",
