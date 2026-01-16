@@ -25,6 +25,12 @@ from app.schemas.upload import (
     UploadError,
     UploadResponse,
 )
+from app.schemas.auth import (
+    LoginRequest,
+    RegisterRequest,
+    TokenResponse,
+    UserResponse,
+)
 
 __all__ = [
     # Base
@@ -63,4 +69,9 @@ __all__ = [
     "MAX_FILE_SIZE",
     "UploadError",
     "UploadResponse",
+    # Auth
+    "LoginRequest",
+    "RegisterRequest",
+    "TokenResponse",
+    "UserResponse",
 ]

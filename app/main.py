@@ -83,11 +83,13 @@ def create_app() -> FastAPI:
     )
 
     # Import and include routers
+    from app.api.auth import router as auth_router
     from app.api.health import router as health_router
     from app.api.upload import router as upload_router
     from app.api.tasks import router as tasks_router
     from app.api.validation import router as validation_router
 
+    app.include_router(auth_router)
     app.include_router(health_router)
     app.include_router(upload_router)
     app.include_router(tasks_router)
