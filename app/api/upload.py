@@ -22,7 +22,8 @@ from app.schemas.upload import (
     UploadResponse,
 )
 from app.services.storage import save_file
-from app.worker.tasks import enqueue_task, process_document
+from app.worker.extraction import process_document_task
+from app.worker.tasks import enqueue_task
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +202,7 @@ async def upload_file(
     await db.refresh(task)
 
     # Enqueue processing job
-    enqueue_task(process_document, str(task_id))
+    enqueue_task(process_document_task, str(task_id))
 
     logger.info(f"File uploaded: task_id={task_id}, filename={filename}, size={actual_size}")
 

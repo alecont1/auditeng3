@@ -30,6 +30,9 @@ from app.worker.status import (
 # Import task utilities
 from app.worker.tasks import base_task, enqueue_task
 
+# Import extraction worker
+from app.worker.extraction import process_document_task
+
 __all__ = [
     # Broker
     "broker",
@@ -47,4 +50,6 @@ __all__ = [
     # Tasks
     "base_task",
     "enqueue_task",
+    # Extraction
+    "process_document_task",
 ]
