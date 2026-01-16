@@ -40,6 +40,7 @@ dependencies = [
     "httpx>=0.28.0",
     "tenacity>=9.0.0",
     "aiofiles>=24.1.0",
+    "reportlab>=4.0.0",
 ]
 
 [project.optional-dependencies]
