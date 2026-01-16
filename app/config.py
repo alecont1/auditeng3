@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "dev-secret-key-change-in-production"  # Use: openssl rand -hex 32
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Rate limiting configuration
+    RATE_LIMIT_PER_MINUTE: int = 10
+    RATE_LIMIT_ENABLED: bool = True
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
