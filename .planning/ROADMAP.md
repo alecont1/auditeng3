@@ -13,7 +13,7 @@ Build an automated electrical commissioning report validation system following t
 - [x] **Phase 1: Foundation** - Data models, database setup, and background job infrastructure
 - [x] **Phase 2: Extraction Pipeline** - Document upload and AI extraction with Claude + Instructor
 - [x] **Phase 3: Validation Engine** - Deterministic validation rules against NETA/IEEE standards
-- [ ] **Phase 4: RAG Pipeline** - Technical standards indexing and retrieval with pgvector
+- [ ] **Phase 4: Standards Configuration** - Multi-standard profiles (NETA/Microsoft) with audit traceability
 - [ ] **Phase 5: API & Findings** - REST API endpoints and finding/verdict generation
 - [ ] **Phase 6: Reporting & Audit** - PDF report generation and comprehensive audit trails
 
@@ -87,26 +87,21 @@ Plans:
 - [x] 03-05: Calibration and cross-field validation
 - [x] 03-06: Equipment-type-specific thresholds
 
-### Phase 4: RAG Pipeline
-**Goal**: Technical standards (NETA, IEEE, Microsoft CxPOR) are indexed and retrievable to provide context during validation
-**Depends on**: Phase 1
-**Requirements**: RAG-01, RAG-02, RAG-03, RAG-04, RAG-05, RAG-06
+### Phase 4: Standards Configuration
+**Goal**: Validation config supports multiple standard profiles (NETA vs Microsoft) with full audit traceability per threshold
+**Depends on**: Phase 3
+**Requirements**: (Note: Original RAG-01 to RAG-06 requirements deferred — standards are finite, not requiring semantic search)
 **Success Criteria** (what must be TRUE):
-  1. Technical standards documents are chunked using semantic boundaries (256-512 tokens)
-  2. Chunks are embedded using text-embedding-3-small
-  3. Embeddings are stored in pgvector with HNSW indexing
-  4. Hybrid search (vector + keyword) retrieves relevant standard sections
-  5. Retrieved standards can be injected as context during validation
-**Research**: Likely (pgvector setup, embedding model choice, chunking strategy)
-**Research topics**: pgvector HNSW configuration, semantic chunking for technical documents, hybrid search patterns
-**Plans**: TBD
+  1. Same test can be validated against NETA or Microsoft standard profile
+  2. Every threshold has a traceable standard reference (e.g., "IEEE 43-2013 Section 12.3")
+  3. Standard profile is selectable per validation call
+  4. Microsoft Data Center thresholds are more restrictive where applicable
+  5. Findings include exact standard clause references for audit compliance
+**Research**: No (thresholds are documented in user's knowledge base)
+**Plans**: 1
 
 Plans:
-- [ ] 04-01: pgvector extension setup
-- [ ] 04-02: Document ingestion and chunking
-- [ ] 04-03: Embedding generation pipeline
-- [ ] 04-04: Hybrid search implementation
-- [ ] 04-05: Context retrieval for validation
+- [ ] 04-01: Multi-standard profiles and audit traceability
 
 ### Phase 5: API & Findings
 **Goal**: Complete REST API with authentication, and finding generation with severity classification and verdicts
@@ -167,11 +162,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Foundation | 5/5 | Complete | 2026-01-15 |
 | 2. Extraction Pipeline | 6/6 | Complete | 2026-01-15 |
 | 3. Validation Engine | 6/6 | Complete | 2026-01-15 |
-| 4. RAG Pipeline | 0/5 | Not started | - |
+| 4. Standards Configuration | 0/1 | Not started | - |
 | 5. API & Findings | 0/6 | Not started | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 17/32 plans complete (53%)
+**Total:** 17/28 plans complete (61%)
 
 ---
 *Roadmap created: 2026-01-15*
