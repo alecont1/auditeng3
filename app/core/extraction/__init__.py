@@ -12,6 +12,7 @@ from app.core.extraction.client import (
     get_anthropic_client,
     get_instructor_client,
 )
+from app.core.extraction.base import BaseExtractor
 from app.core.extraction.schemas import (
     BaseExtractionResult,
     CalibrationInfo,
@@ -21,6 +22,8 @@ from app.core.extraction.schemas import (
 )
 
 __all__ = [
+    # Base
+    "BaseExtractor",
     # Client
     "DEFAULT_MODEL",
     "MAX_RETRIES",
