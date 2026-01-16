@@ -192,6 +192,19 @@ async def _process_document_async(task_id: str) -> None:
             )
             await FindingService.persist_findings(session, finding_creates)
 
+            # 10.1 Audit logging - log each validation rule evaluation (passed and failed)
+            for rule_eval in validation_result.rules_evaluated:
+                try:
+                    await AuditService.log_validation_rule(
+                        db=session,
+                        analysis_id=analysis.id,
+                        rule_id=rule_eval.rule_id,
+                        passed=rule_eval.passed,
+                        details=rule_eval.details,
+                    )
+                except Exception as audit_err:
+                    logger.warning(f"Audit log failed (validation_rule): {audit_err}")
+
             # 11. Audit logging - log each finding generated
             for finding in validation_result.findings:
                 try:
