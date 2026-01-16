@@ -98,7 +98,7 @@ class GroundingValidator(BaseValidator):
                 field_path=f"measurements[{index}].resistance_value",
                 extracted_value=resistance,
                 threshold=threshold,
-                standard_reference="NETA ATS Table 100.1",
+                # standard_reference from config via _get_default_reference()
                 remediation="Investigate ground connection, consider adding ground rods",
             )
         else:
@@ -110,5 +110,5 @@ class GroundingValidator(BaseValidator):
                 field_path=f"measurements[{index}].resistance_value",
                 extracted_value=resistance,
                 threshold=threshold,
-                standard_reference="NETA ATS Table 100.1",
+                # standard_reference from config via _get_default_reference()
             )

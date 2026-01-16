@@ -4,6 +4,7 @@ This module defines the abstract base class that all specific
 validators (Grounding, Megger, Thermography) inherit from.
 
 VALD-07: Validators are deterministic - same input always produces same output.
+VALD-09: Same extraction can be validated against different standards.
 """
 
 from abc import ABC, abstractmethod
@@ -16,6 +17,7 @@ from app.core.validation.schemas import (
     ValidationResult,
     ValidationSeverity,
 )
+from app.core.validation.standards import StandardProfile
 
 
 class BaseValidator(ABC):
@@ -27,16 +29,24 @@ class BaseValidator(ABC):
     Subclasses implement validate() for specific test types.
 
     Attributes:
+        standard: Active standard profile (NETA or MICROSOFT).
         config: Validation configuration with thresholds.
     """
 
-    def __init__(self, config: ValidationConfig | None = None) -> None:
-        """Initialize with optional custom config for testing.
+    def __init__(
+        self,
+        config: ValidationConfig | None = None,
+        standard: StandardProfile = StandardProfile.NETA,
+    ) -> None:
+        """Initialize with optional custom config and standard profile.
 
         Args:
-            config: Optional custom configuration. Uses default if None.
+            config: Optional custom configuration. If None, builds from standard.
+            standard: Which standard profile to use (NETA or MICROSOFT).
+                      Ignored if config is provided explicitly.
         """
-        self.config = config or get_validation_config()
+        self.standard = standard
+        self.config = config or get_validation_config(standard)
 
     @property
     @abstractmethod
@@ -62,6 +72,21 @@ class BaseValidator(ABC):
         """
         pass
 
+    def _get_default_reference(self) -> str:
+        """Get default standard reference based on test type and active standard.
+
+        Returns:
+            Standard reference string for audit traceability.
+        """
+        # Map test type to config attribute
+        ref_map = {
+            "grounding": self.config.grounding.standard_reference,
+            "megger": self.config.megger.standard_reference,
+            "thermography": self.config.thermography.standard_reference,
+            "calibration": self.config.calibration.standard_reference,
+        }
+        return ref_map.get(self.test_type, f"{self.standard.value.upper()} Standard")
+
     def add_finding(
         self,
         findings: list[Finding],
@@ -84,9 +109,14 @@ class BaseValidator(ABC):
             field_path: Path to the validated field.
             extracted_value: The value that was validated.
             threshold: The threshold used for comparison.
-            standard_reference: Optional standard reference.
+            standard_reference: Optional standard reference. If None, uses
+                              config's reference for this test type.
             remediation: Optional suggested fix.
         """
+        # Use config's reference as default if none provided
+        if standard_reference is None:
+            standard_reference = self._get_default_reference()
+
         findings.append(
             Finding(
                 rule_id=rule_id,

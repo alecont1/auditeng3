@@ -53,7 +53,7 @@ class MeggerValidator(BaseValidator):
                 field_path=f"measurements[{index}].polarization_index",
                 extracted_value=None,
                 threshold=min_pi,
-                standard_reference="IEEE 43 Section 12.3",
+                # standard_reference from config via _get_default_reference()
                 remediation="Ensure 1-minute and 10-minute readings are recorded",
             )
             return
@@ -68,7 +68,7 @@ class MeggerValidator(BaseValidator):
                 field_path=f"measurements[{index}].polarization_index",
                 extracted_value=pi,
                 threshold=min_pi,
-                standard_reference="IEEE 43 Table 3",
+                # standard_reference from config via _get_default_reference()
                 remediation="Insulation may be contaminated or degraded. Investigate cause.",
             )
         else:
@@ -80,7 +80,7 @@ class MeggerValidator(BaseValidator):
                 field_path=f"measurements[{index}].polarization_index",
                 extracted_value=pi,
                 threshold=min_pi,
-                standard_reference="IEEE 43 Table 3",
+                # standard_reference from config via _get_default_reference()
             )
 
     def _validate_insulation_resistance(
@@ -115,7 +115,7 @@ class MeggerValidator(BaseValidator):
                 field_path=f"measurements[{index}].ir_1min",
                 extracted_value=ir_value,
                 threshold=min_ir,
-                standard_reference="IEEE 43 Table 4",
+                # standard_reference from config via _get_default_reference()
                 remediation="Low insulation resistance indicates degradation. Investigate moisture, contamination, or aging.",
             )
         else:
@@ -127,5 +127,5 @@ class MeggerValidator(BaseValidator):
                 field_path=f"measurements[{index}].ir_1min",
                 extracted_value=ir_value,
                 threshold=min_ir,
-                standard_reference="IEEE 43 Table 4",
+                # standard_reference from config via _get_default_reference()
             )

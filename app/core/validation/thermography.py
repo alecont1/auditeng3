@@ -47,7 +47,7 @@ class ThermographyValidator(BaseValidator):
                 field_path="hotspots",
                 extracted_value=0,
                 threshold="None expected",
-                standard_reference="NETA MTS Table 100.18",
+                # standard_reference from config via _get_default_reference()
             )
         else:
             for i, hotspot in enumerate(extraction.hotspots):
@@ -136,6 +136,6 @@ class ThermographyValidator(BaseValidator):
             field_path=f"hotspots[{index}].delta_t",
             extracted_value=delta_t,
             threshold=threshold_desc,
-            standard_reference="NETA MTS Table 100.18 / Microsoft CxPOR",
+            # standard_reference from config via _get_default_reference()
             remediation=remediation_map.get(classification),
         )
