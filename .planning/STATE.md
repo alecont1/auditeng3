@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-15)
 
 **Core value:** "IA extrai, codigo valida" — AI extraction + deterministic validation ensures reproducibility, explainability, and traceability of every finding.
-**Current focus:** Milestone complete — all phases finished
+**Current focus:** Milestone complete — all phases finished (including gap closure)
 
 ## Current Position
 
 Phase: 6 of 6 (Reporting & Audit)
-Plan: 4 of 4 complete in current phase
+Plan: 5 of 5 complete in current phase (including gap closure plan 06-05)
 Status: Phase complete
-Last activity: 2026-01-16 — Completed 06-04-PLAN.md
+Last activity: 2026-01-16 — Completed 06-05-PLAN.md (gap closure: validation rule logging)
 
 Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 26
+- Total plans completed: 27
 - Average duration: —
 - Total execution time: —
 
@@ -32,10 +32,10 @@ Progress: ██████████ 100%
 | 3. Validation Engine | 6/6 | Complete | — |
 | 4. Standards Configuration | 1/1 | Complete | 5min |
 | 5. API & Findings | 4/4 | Complete | 9min |
-| 6. Reporting & Audit | 4/4 | Complete | 5min |
+| 6. Reporting & Audit | 5/5 | Complete | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04, 06-01, 06-02, 06-03, 06-04
+- Last 5 plans: 06-01, 06-02, 06-03, 06-04, 06-05
 - Trend: Stable
 
 ## Accumulated Context
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - ValidationError for business logic errors (consistent with codebase)
 - Audit trail pagination with skip/limit query params (default limit=100, max 1000)
 - Return total event_count separate from paginated events list
+- RuleEvaluation tracks both passed and failed rules for complete audit trail
+- Optional rules_evaluated param on add_finding for backward compatibility
+- Separate track_rule() method for explicit rule tracking in validators
 
 ### Pending Todos
 
@@ -85,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 06-04-PLAN.md (Audit Trail API Endpoints)
+Stopped at: Completed 06-05-PLAN.md (Gap closure: validation rule logging)
 Resume file: None

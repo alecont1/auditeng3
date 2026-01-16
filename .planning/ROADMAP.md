@@ -149,6 +149,7 @@ Plans:
 - [x] 06-02: Report generation service
 - [x] 06-03: Audit logging infrastructure
 - [x] 06-04: Audit trail API endpoints
+- [x] 06-05: Validation rule logging (gap closure)
 
 ## Progress
 
@@ -162,9 +163,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Validation Engine | 6/6 | Complete | 2026-01-15 |
 | 4. Standards Configuration | 1/1 | Complete | 2026-01-16 |
 | 5. API & Findings | 4/4 | Complete | 2026-01-16 |
-| 6. Reporting & Audit | 4/4 | Complete | 2026-01-16 |
+| 6. Reporting & Audit | 5/5 | Complete | 2026-01-16 |
 
-**Total:** 26/26 plans complete (100%)
+**Total:** 27/27 plans complete (100%)
 
 ---
 *Roadmap created: 2026-01-15*
