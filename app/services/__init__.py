@@ -23,6 +23,11 @@ from app.services.verdict import (
     compute_verdict,
 )
 from app.services.report import ReportService
+from app.services.audit import (
+    AuditService,
+    EventType,
+    log_event,
+)
 
 __all__ = [
     # Storage
@@ -45,4 +50,8 @@ __all__ = [
     "compute_verdict",
     # Report
     "ReportService",
+    # Audit
+    "AuditService",
+    "EventType",
+    "log_event",
 ]
