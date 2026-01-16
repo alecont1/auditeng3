@@ -56,7 +56,7 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: File upload and storage
+- [x] 02-01: File upload and storage
 - [ ] 02-02: Instructor + Claude integration
 - [ ] 02-03: Grounding test extraction schema
 - [ ] 02-04: Megger test extraction schema
@@ -165,13 +165,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-01-15 |
-| 2. Extraction Pipeline | 0/6 | Not started | - |
+| 2. Extraction Pipeline | 1/6 | In progress | - |
 | 3. Validation Engine | 0/6 | Not started | - |
 | 4. RAG Pipeline | 0/5 | Not started | - |
 | 5. API & Findings | 0/6 | Not started | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 5/32 plans complete (16%)
+**Total:** 6/32 plans complete (19%)
 
 ---
 *Roadmap created: 2026-01-15*
