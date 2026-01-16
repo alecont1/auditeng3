@@ -84,8 +84,10 @@ def create_app() -> FastAPI:
 
     # Import and include routers
     from app.api.health import router as health_router
+    from app.api.upload import router as upload_router
 
     app.include_router(health_router)
+    app.include_router(upload_router)
 
     # Register exception handlers
     from app.core.exceptions import (
