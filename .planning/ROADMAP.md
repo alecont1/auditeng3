@@ -60,7 +60,7 @@ Plans:
 - [x] 02-02: Instructor + Claude integration
 - [x] 02-03: Grounding test extraction schema
 - [x] 02-04: Megger test extraction schema
-- [ ] 02-05: Thermography extraction with Vision
+- [x] 02-05: Thermography extraction with Vision
 - [ ] 02-06: Confidence scoring and retry logic
 
 ### Phase 3: Validation Engine
@@ -165,13 +165,13 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 5/5 | Complete | 2026-01-15 |
-| 2. Extraction Pipeline | 4/6 | In progress | - |
+| 2. Extraction Pipeline | 5/6 | In progress | - |
 | 3. Validation Engine | 0/6 | Not started | - |
 | 4. RAG Pipeline | 0/5 | Not started | - |
 | 5. API & Findings | 0/6 | Not started | - |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 9/32 plans complete (28%)
+**Total:** 10/32 plans complete (31%)
 
 ---
 *Roadmap created: 2026-01-15*
