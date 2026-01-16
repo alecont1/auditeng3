@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     # Anthropic API configuration
     ANTHROPIC_API_KEY: str = ""
 
+    # JWT authentication configuration
+    JWT_SECRET_KEY: str = "dev-secret-key-change-in-production"  # Use: openssl rand -hex 32
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
