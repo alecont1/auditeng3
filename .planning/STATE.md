@@ -5,33 +5,33 @@
 See: .planning/PROJECT.md (updated 2026-01-15)
 
 **Core value:** "IA extrai, código valida" — AI extraction + deterministic validation ensures reproducibility, explainability, and traceability of every finding.
-**Current focus:** Phase 1 — Foundation
+**Current focus:** Phase 2 — Extraction Pipeline
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation)
+Phase: 2 of 6 (Extraction Pipeline)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-01-15 — Roadmap created
+Last activity: 2026-01-15 — Phase 1 complete
 
-Progress: ░░░░░░░░░░ 0%
+Progress: █░░░░░░░░░ 17%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
+- Total plans completed: 5
 - Average duration: —
-- Total execution time: 0 hours
+- Total execution time: —
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| — | — | — | — |
+| 1. Foundation | 5/5 | Complete | — |
 
 **Recent Trend:**
-- Last 5 plans: —
-- Trend: —
+- Last 5 plans: 01-01, 01-02, 01-03, 01-04, 01-05
+- Trend: Stable
 
 ## Accumulated Context
 
@@ -44,6 +44,8 @@ Recent decisions affecting current work:
 - RAG from the start (not deferred to Phase 2)
 - Dramatiq over RQ (better reliability)
 - pgvector over dedicated vector DB (ACID compliance, simpler infrastructure)
+- Pydantic v2 with StrEnum for all enums
+- SQLAlchemy 2.0 async with mapped_column style
 
 ### Pending Todos
 
@@ -56,5 +58,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-15
-Stopped at: Roadmap creation complete
+Stopped at: Phase 1 complete, ready for Phase 2
 Resume file: None

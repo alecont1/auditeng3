@@ -92,19 +92,19 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Background Processing (PROC)
 
-- [ ] **PROC-01**: System uses Dramatiq for reliable job queue processing
-- [ ] **PROC-02**: Jobs retry on failure with exponential backoff
-- [ ] **PROC-03**: System supports job prioritization
-- [ ] **PROC-04**: System provides job status tracking
-- [ ] **PROC-05**: System handles graceful degradation on partial failures
+- [x] **PROC-01**: System uses Dramatiq for reliable job queue processing
+- [x] **PROC-02**: Jobs retry on failure with exponential backoff
+- [x] **PROC-03**: System supports job prioritization
+- [x] **PROC-04**: System provides job status tracking
+- [x] **PROC-05**: System handles graceful degradation on partial failures
 
 ### Data Models (DATA)
 
-- [ ] **DATA-01**: System stores analysis results in PostgreSQL
-- [ ] **DATA-02**: System uses SQLAlchemy 2.0 with async support
-- [ ] **DATA-03**: System uses Alembic for database migrations
-- [ ] **DATA-04**: System stores user and authentication data
-- [ ] **DATA-05**: System stores document metadata and storage references
+- [x] **DATA-01**: System stores analysis results in PostgreSQL
+- [x] **DATA-02**: System uses SQLAlchemy 2.0 with async support
+- [x] **DATA-03**: System uses Alembic for database migrations
+- [x] **DATA-04**: System stores user and authentication data
+- [x] **DATA-05**: System stores document metadata and storage references
 
 ## v2 Requirements
 
@@ -178,16 +178,16 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| PROC-01 | Phase 1 | Pending |
-| PROC-02 | Phase 1 | Pending |
-| PROC-03 | Phase 1 | Pending |
-| PROC-04 | Phase 1 | Pending |
-| PROC-05 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
+| PROC-01 | Phase 1 | Complete |
+| PROC-02 | Phase 1 | Complete |
+| PROC-03 | Phase 1 | Complete |
+| PROC-04 | Phase 1 | Complete |
+| PROC-05 | Phase 1 | Complete |
 | UPLD-01 | Phase 2 | Pending |
 | UPLD-02 | Phase 2 | Pending |
 | UPLD-03 | Phase 2 | Pending |
@@ -255,4 +255,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-01-15*
-*Last updated: 2026-01-15 after initial definition*
+*Last updated: 2026-01-15 after Phase 1 completion*
