@@ -19,6 +19,13 @@ from app.core.extraction.grounding import (
     GroundingMeasurement,
     GroundingTestConditions,
 )
+from app.core.extraction.megger import (
+    InsulationReading,
+    MeggerExtractionResult,
+    MeggerExtractor,
+    MeggerMeasurement,
+    MeggerTestConditions,
+)
 from app.core.extraction.schemas import (
     BaseExtractionResult,
     CalibrationInfo,
@@ -35,6 +42,12 @@ __all__ = [
     "GroundingExtractor",
     "GroundingMeasurement",
     "GroundingTestConditions",
+    # Megger
+    "InsulationReading",
+    "MeggerExtractionResult",
+    "MeggerExtractor",
+    "MeggerMeasurement",
+    "MeggerTestConditions",
     # Client
     "DEFAULT_MODEL",
     "MAX_RETRIES",
