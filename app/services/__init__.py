@@ -22,6 +22,7 @@ from app.services.verdict import (
     compute_compliance_score,
     compute_verdict,
 )
+from app.services.report import ReportService
 
 __all__ = [
     # Storage
@@ -42,4 +43,6 @@ __all__ = [
     "VerdictService",
     "compute_compliance_score",
     "compute_verdict",
+    # Report
+    "ReportService",
 ]
