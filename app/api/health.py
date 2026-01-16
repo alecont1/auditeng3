@@ -17,7 +17,7 @@ from sqlalchemy import text
 from app.config import get_settings
 from app.db import async_session_factory
 
-router = APIRouter(prefix="/health", tags=["health"])
+router = APIRouter(prefix="/api/health", tags=["health"])
 settings = get_settings()
 
 

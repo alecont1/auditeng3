@@ -121,8 +121,15 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         Returns:
             Response from the handler or 429 if rate limited.
         """
-        # Skip rate limiting for health checks
-        if request.url.path in ["/api/health", "/api/health/ready"]:
+        # Skip rate limiting for health checks and docs
+        if request.url.path in [
+            "/api/health",
+            "/api/health/live",
+            "/api/health/ready",
+            "/docs",
+            "/redoc",
+            "/api/v1/openapi.json",
+        ]:
             return await call_next(request)
 
         limit = self.settings.RATE_LIMIT_PER_MINUTE
