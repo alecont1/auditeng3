@@ -18,9 +18,13 @@ from app.schemas.enums import TaskStatus, TestType
 from app.services.extraction import process_document
 from app.services.finding import FindingService
 from app.services.verdict import VerdictService
+from app.services.audit import AuditService
 from app.core.validation import ValidationOrchestrator
 from app.worker.broker import broker
 from app.worker.status import JobStatus, set_job_status
+
+# Default model version - can be overridden from config
+MODEL_VERSION = "claude-sonnet-4"
 
 logger = logging.getLogger(__name__)
 
@@ -164,13 +168,52 @@ async def _process_document_async(task_id: str) -> None:
             session.add(analysis)
             await session.flush()  # Get analysis.id before creating findings
 
-            # 8. Generate and persist findings using FindingService
+            # 8. Audit logging - extraction start (logged retroactively with analysis.id)
+            prompt_version = f"{test_type_str or 'unknown'}_v1"
+            try:
+                await AuditService.log_extraction_start(
+                    session, analysis.id, MODEL_VERSION, prompt_version
+                )
+            except Exception as audit_err:
+                logger.warning(f"Audit log failed (extraction_start): {audit_err}")
+
+            # 9. Audit logging - extraction complete
+            field_count = len(result.model_dump(mode="json").get("measurements", []))
+            try:
+                await AuditService.log_extraction_complete(
+                    session, analysis.id, confidence_score, field_count
+                )
+            except Exception as audit_err:
+                logger.warning(f"Audit log failed (extraction_complete): {audit_err}")
+
+            # 10. Generate and persist findings using FindingService
             finding_creates = FindingService.generate_findings_from_validation(
                 validation_result, analysis.id
             )
             await FindingService.persist_findings(session, finding_creates)
 
-            # 9. Update task status
+            # 11. Audit logging - log each finding generated
+            for finding in validation_result.findings:
+                try:
+                    await AuditService.log_finding_generated(
+                        session,
+                        analysis.id,
+                        finding.rule_id,
+                        finding.severity.value,
+                        finding.message,
+                    )
+                except Exception as audit_err:
+                    logger.warning(f"Audit log failed (finding_generated): {audit_err}")
+
+            # 12. Audit logging - validation complete
+            try:
+                await AuditService.log_validation_complete(
+                    session, analysis.id, verdict.value, compliance_score
+                )
+            except Exception as audit_err:
+                logger.warning(f"Audit log failed (validation_complete): {audit_err}")
+
+            # 13. Update task status
             task.status = TaskStatus.COMPLETED.value
             await session.commit()
 
@@ -193,6 +236,16 @@ async def _process_document_async(task_id: str) -> None:
 
         except Exception as e:
             logger.exception(f"Extraction failed for task {task_id}: {e}")
+
+            # Audit logging - extraction failed
+            # Note: analysis may not exist if failure occurred before creation
+            try:
+                if "analysis" in locals():
+                    await AuditService.log_extraction_failed(
+                        session, analysis.id, str(e)
+                    )
+            except Exception as audit_err:
+                logger.warning(f"Audit log failed (extraction_failed): {audit_err}")
 
             # Update task with error
             task.status = TaskStatus.FAILED.value
