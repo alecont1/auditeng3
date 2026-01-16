@@ -219,22 +219,22 @@ Which phases cover which requirements. Updated by create-roadmap.
 | RAG-04 | Phase 4 | Pending |
 | RAG-05 | Phase 4 | Pending |
 | RAG-06 | Phase 4 | Pending |
-| API-01 | Phase 5 | Pending |
-| API-02 | Phase 5 | Pending |
-| API-03 | Phase 5 | Pending |
-| API-04 | Phase 5 | Pending |
-| API-05 | Phase 5 | Pending |
-| API-06 | Phase 5 | Pending |
-| API-07 | Phase 5 | Pending |
-| FIND-01 | Phase 5 | Pending |
-| FIND-02 | Phase 5 | Pending |
-| FIND-03 | Phase 5 | Pending |
-| FIND-04 | Phase 5 | Pending |
-| FIND-05 | Phase 5 | Pending |
-| FIND-06 | Phase 5 | Pending |
-| FIND-07 | Phase 5 | Pending |
-| FIND-08 | Phase 5 | Pending |
-| FIND-09 | Phase 5 | Pending |
+| API-01 | Phase 5 | Complete |
+| API-02 | Phase 5 | Complete |
+| API-03 | Phase 5 | Complete |
+| API-04 | Phase 5 | Complete |
+| API-05 | Phase 5 | Complete |
+| API-06 | Phase 5 | Complete |
+| API-07 | Phase 5 | Complete |
+| FIND-01 | Phase 5 | Complete |
+| FIND-02 | Phase 5 | Complete |
+| FIND-03 | Phase 5 | Complete |
+| FIND-04 | Phase 5 | Complete |
+| FIND-05 | Phase 5 | Complete |
+| FIND-06 | Phase 5 | Complete |
+| FIND-07 | Phase 5 | Complete |
+| FIND-08 | Phase 5 | Complete |
+| FIND-09 | Phase 5 | Complete |
 | REPT-01 | Phase 6 | Pending |
 | REPT-02 | Phase 6 | Pending |
 | REPT-03 | Phase 6 | Pending |
@@ -255,4 +255,4 @@ Which phases cover which requirements. Updated by create-roadmap.
 
 ---
 *Requirements defined: 2026-01-15*
-*Last updated: 2026-01-15 after Phase 1 completion*
+*Last updated: 2026-01-16 after Phase 5 completion*
