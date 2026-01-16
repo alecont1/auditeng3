@@ -123,7 +123,7 @@ Plans:
 Plans:
 - [x] 05-01: Authentication endpoints (JWT)
 - [x] 05-02: Finding and verdict services
-- [ ] 05-03: Status and results endpoints
+- [x] 05-03: Status and results endpoints
 - [x] 05-04: Rate limiting and OpenAPI docs
 
 ### Phase 6: Reporting & Audit
@@ -161,10 +161,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 2. Extraction Pipeline | 6/6 | Complete | 2026-01-15 |
 | 3. Validation Engine | 6/6 | Complete | 2026-01-15 |
 | 4. Standards Configuration | 1/1 | Complete | 2026-01-16 |
-| 5. API & Findings | 3/4 | In progress | - |
+| 5. API & Findings | 4/4 | Complete | 2026-01-16 |
 | 6. Reporting & Audit | 0/4 | Not started | - |
 
-**Total:** 21/26 plans complete (81%)
+**Total:** 22/26 plans complete (85%)
 
 ---
 *Roadmap created: 2026-01-15*

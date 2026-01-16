@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-15)
 
 **Core value:** "IA extrai, codigo valida" — AI extraction + deterministic validation ensures reproducibility, explainability, and traceability of every finding.
-**Current focus:** Phase 5 in progress — API & Findings
+**Current focus:** Phase 5 complete — Ready for Phase 6: Reporting & Audit
 
 ## Current Position
 
 Phase: 5 of 6 (API & Findings)
-Plan: 3 of 4 complete in current phase
-Status: In progress
-Last activity: 2026-01-16 — Completed 05-04-PLAN.md
+Plan: 4 of 4 complete in current phase
+Status: Phase complete
+Last activity: 2026-01-16 — Completed 05-03-PLAN.md
 
-Progress: ████████░░ 81%
+Progress: █████████░ 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 22
 - Average duration: —
 - Total execution time: —
 
@@ -31,10 +31,10 @@ Progress: ████████░░ 81%
 | 2. Extraction Pipeline | 6/6 | Complete | — |
 | 3. Validation Engine | 6/6 | Complete | — |
 | 4. Standards Configuration | 1/1 | Complete | 5min |
-| 5. API & Findings | 3/4 | In progress | 7min |
+| 5. API & Findings | 4/4 | Complete | 9min |
 
 **Recent Trend:**
-- Last 5 plans: 03-06, 04-01, 05-01, 05-02, 05-04
+- Last 5 plans: 04-01, 05-01, 05-02, 05-03, 05-04
 - Trend: Stable
 
 ## Accumulated Context
@@ -61,6 +61,9 @@ Recent decisions affecting current work:
 - N/A default for missing standard_reference in finding evidence
 - Fail open on Redis failure for rate limiting (API continues without rate limiting)
 - Per-user rate limiting using JWT user_id, fallback to IP for unauthenticated
+- CurrentUser dependency for all protected analyses endpoints
+- Ownership verification via analysis.task.user_id == current_user.id
+- Return 202 Accepted for in-progress analyses
 
 ### Pending Todos
 
@@ -73,5 +76,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-16
-Stopped at: Completed 05-04-PLAN.md (Rate Limiting and OpenAPI)
+Stopped at: Completed 05-03-PLAN.md (Status and Results Endpoints)
 Resume file: None
