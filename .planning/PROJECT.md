@@ -1,5 +1,11 @@
 # AuditEng
 
+## Current State
+
+**Shipped:** v1.0 MVP (2026-01-16)
+**Codebase:** 13,142 LOC Python across 92 files
+**Tech stack:** FastAPI, SQLAlchemy 2.0, Pydantic v2, Dramatiq, PostgreSQL, Redis, Claude API
+
 ## What This Is
 
 Sistema de auditoria automatizada de relatórios de comissionamento elétrico para data centers. Usa IA (Claude) para extrair dados estruturados de PDFs/imagens e código Python para validar contra normas técnicas (NETA, IEEE, Microsoft CxPOR), gerando findings categorizados por severidade com aprovação/reprovação automática.
@@ -12,29 +18,33 @@ Sistema de auditoria automatizada de relatórios de comissionamento elétrico pa
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ FastAPI backend with health checks and error handling — v1.0
+- ✓ SQLAlchemy 2.0 models with Alembic migrations — v1.0
+- ✓ Dramatiq job queue with Redis for background processing — v1.0
+- ✓ File upload API (PDF up to 50MB, images) — v1.0
+- ✓ AI extraction with Instructor + Claude for 3 test types — v1.0
+- ✓ Confidence scoring and retry logic — v1.0
+- ✓ Deterministic validation against NETA/IEEE standards — v1.0
+- ✓ Multi-standard profiles (NETA, Microsoft) with audit traceability — v1.0
+- ✓ JWT authentication with OAuth2 flow — v1.0
+- ✓ Rate limiting (10 req/min per user) — v1.0
+- ✓ Finding generation with severity levels — v1.0
+- ✓ Compliance score and verdict computation — v1.0
+- ✓ PDF report generation with ReportLab — v1.0
+- ✓ Audit trail with rule-level tracking — v1.0
+- ✓ OpenAPI/Swagger documentation — v1.0
 
 ### Active
 
-- [ ] Extração estruturada de PDFs com Instructor + Claude
-- [ ] Validação determinística contra normas NETA/IEEE/Microsoft
-- [ ] 5 tipos de equipamento: PANEL, UPS, ATS, GEN, XFMR
-- [ ] 3 tipos de teste MVP: Grounding, Megger, Thermography
-- [ ] Sistema de findings com severidade (CRITICAL, MAJOR, MINOR, INFO)
-- [ ] Score de compliance e confidence
-- [ ] Veredicto automático (APPROVED, REVIEW, REJECTED)
-- [ ] RAG pipeline para consulta de normas técnicas
-- [ ] API REST com FastAPI
-- [ ] Background processing com Redis + RQ
-- [ ] Multi-agent orchestration para desenvolvimento
+(None — awaiting next milestone planning)
 
 ### Out of Scope
 
 - App mobile nativo — foco em web/API primeiro
 - Integração com sistemas externos (Procore, etc) — MVP standalone
-- Geração automática de relatórios PDF — fora do MVP
 - Multi-idioma — inglês apenas para MVP
 - Frontend web completo — API-first, UI básica
+- RAG pipeline — standards are finite, hard-coded thresholds suffice for v1
 
 ## Context
 
@@ -48,24 +58,28 @@ Sistema de auditoria automatizada de relatórios de comissionamento elétrico pa
 - `/mnt/c/Users/xande/OneDrive/Documentos/auditenga/.claude/knowledge/` — Regras de validação e normas
 - `/mnt/c/Users/xande/OneDrive/Documentos/auditenga/.claude/team/` — Personas de agentes
 
-**Abordagem:** Fresh start usando Python, seguindo os specs existentes como blueprint.
-
 ## Constraints
 
-- **Stack**: Python + FastAPI + Instructor + Pydantic v2 + SQLAlchemy 2.0 + PostgreSQL + Redis — Escolha deliberada para tipagem forte e async
-- **AI**: Claude Sonnet 4 via Instructor — Melhor custo-benefício para extração estruturada
-- **Validation**: 100% determinística — Mesmos dados sempre geram mesmos findings
-- **Files**: Max 50MB por PDF — Limite prático para processamento
-- **Deploy**: Railway/Render — Simplicidade, sem DevOps complexo
+- **Stack**: Python + FastAPI + Instructor + Pydantic v2 + SQLAlchemy 2.0 + PostgreSQL + Redis
+- **AI**: Claude Sonnet 4 via Instructor
+- **Validation**: 100% determinística
+- **Files**: Max 50MB por PDF
+- **Deploy**: Railway/Render
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Fresh start (não usar código existente) | Specs bem documentados, código existente incompleto | — Pending |
-| RAG desde o início | Consulta a normas técnicas é core para validação inteligente | — Pending |
-| Python-only (sem TypeScript) | Instructor, melhor ecossistema de IA, tipagem com Pydantic | — Pending |
-| Multi-agent development | Especialização por domínio (Backend, AI, Domain, QA) | — Pending |
+| Fresh start (não usar código existente) | Specs bem documentados, código existente incompleto | ✓ Good |
+| Python-only (sem TypeScript) | Instructor, melhor ecossistema de IA, tipagem com Pydantic | ✓ Good |
+| Dramatiq over RQ | Better reliability, cleaner API | ✓ Good |
+| pgvector deferred | Standards are finite, hard-coded thresholds suffice | ✓ Good |
+| Pydantic v2 with StrEnum | Type safety, JSON serialization | ✓ Good |
+| SQLAlchemy 2.0 async | Modern patterns, better performance | ✓ Good |
+| BaseValidator pattern | Consistent validation, easy to extend | ✓ Good |
+| python-jose for JWT | Better algorithm support than PyJWT | ✓ Good |
+| ReportLab for PDF | Minimal dependencies, engineer-focused | ✓ Good |
+| Append-only audit logs | Compliance requirement, simple implementation | ✓ Good |
 
 ---
-*Last updated: 2026-01-15 after initialization*
+*Last updated: 2026-01-16 after v1.0 milestone*
