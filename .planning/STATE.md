@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 
 ## Current Position
 
-Phase: 08 - Layout & Components (complete)
-Plan: 2 of 2 in current phase
-Status: Phase 08 complete, ready for Phase 09
-Last activity: 2026-01-17 — Completed 08-02-PLAN.md
+Phase: 09 - Upload (in progress)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-17 — Completed 09-01-PLAN.md
 
-Progress: █████░░░░░ 5/19 plans (26%)
+Progress: ██████░░░░ 6/19 plans (32%)
 
 ## Milestone v2.0 Overview
 
@@ -27,7 +27,7 @@ Progress: █████░░░░░ 5/19 plans (26%)
 |-------|-------|-------|--------|
 | 07 | Setup & Auth | 3 | Complete (3/3) |
 | 08 | Layout & Components | 2 | Complete (2/2) |
-| 09 | Upload | 2 | Pending |
+| 09 | Upload | 2 | In progress (1/2) |
 | 10 | Dashboard | 2 | Pending |
 | 11 | Details & Review | 3 | Pending |
 | 12 | Reports & Audit | 2 | Pending |
@@ -62,6 +62,8 @@ Progress: █████░░░░░ 5/19 plans (26%)
 | MainLayout wrapper pattern | Protected routes wrapped in MainLayout for consistent shell | 08-01 |
 | sonner for toasts | Lightweight, shadcn-compatible, simple API | 08-02 |
 | Class ErrorBoundary | React requires class components for componentDidCatch | 08-02 |
+| Native drag-drop events | No external library (react-dropzone), uses HTML5 API | 09-01 |
+| File validation before callback | Validate type/size before passing file to parent | 09-01 |
 
 ### API Endpoints Needed
 
@@ -77,12 +79,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 08-02-PLAN.md (Common Components)
+Stopped at: Completed 09-01-PLAN.md (Upload Interface)
 Resume file: None
 
 ## Next Action
 
-Phase 08 complete. Continue with Phase 09:
+Continue with Phase 09 plan 02:
 ```
-/gsd:plan-phase 09
+/gsd:execute-plan .planning/phases/09-upload/09-02-PLAN.md
 ```
