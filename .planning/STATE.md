@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 
 ## Current Position
 
-Phase: 08 - Layout & Components (in progress)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-17 — Completed 08-01-PLAN.md
+Phase: 08 - Layout & Components (complete)
+Plan: 2 of 2 in current phase
+Status: Phase 08 complete, ready for Phase 09
+Last activity: 2026-01-17 — Completed 08-02-PLAN.md
 
-Progress: ████░░░░░░ 4/19 plans (21%)
+Progress: █████░░░░░ 5/19 plans (26%)
 
 ## Milestone v2.0 Overview
 
@@ -26,7 +26,7 @@ Progress: ████░░░░░░ 4/19 plans (21%)
 | Phase | Focus | Plans | Status |
 |-------|-------|-------|--------|
 | 07 | Setup & Auth | 3 | Complete (3/3) |
-| 08 | Layout & Components | 2 | In progress (1/2) |
+| 08 | Layout & Components | 2 | Complete (2/2) |
 | 09 | Upload | 2 | Pending |
 | 10 | Dashboard | 2 | Pending |
 | 11 | Details & Review | 3 | Pending |
@@ -60,6 +60,8 @@ Progress: ████░░░░░░ 4/19 plans (21%)
 | Fixed sidebar 240px | Standard SaaS app shell width, overlay on mobile | 08-01 |
 | NavLink for navigation | Uses react-router-dom NavLink for automatic active state | 08-01 |
 | MainLayout wrapper pattern | Protected routes wrapped in MainLayout for consistent shell | 08-01 |
+| sonner for toasts | Lightweight, shadcn-compatible, simple API | 08-02 |
+| Class ErrorBoundary | React requires class components for componentDidCatch | 08-02 |
 
 ### API Endpoints Needed
 
@@ -75,12 +77,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 08-01-PLAN.md (App Shell & Navigation)
+Stopped at: Completed 08-02-PLAN.md (Common Components)
 Resume file: None
 
 ## Next Action
 
-Plan 08-01 complete. Continue with Plan 08-02:
+Phase 08 complete. Continue with Phase 09:
 ```
-/gsd:execute-plan 08-02
+/gsd:plan-phase 09
 ```
