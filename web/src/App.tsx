@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { LoginPage, DashboardPage } from '@/pages'
+import { LoginPage, DashboardPage, UploadPage } from '@/pages'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { MainLayout } from '@/components/layout'
 
@@ -16,6 +16,17 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <DashboardPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/upload"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <UploadPage />
             </MainLayout>
           </ProtectedRoute>
         }

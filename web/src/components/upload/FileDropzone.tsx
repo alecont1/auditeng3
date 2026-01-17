@@ -1,4 +1,5 @@
-import { useState, useRef, DragEvent, ChangeEvent } from 'react'
+import { useState, useRef } from 'react'
+import type { DragEvent, ChangeEvent } from 'react'
 import { Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
