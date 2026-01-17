@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 
 ## Current Position
 
-Phase: 09 - Upload (in progress)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-17 — Completed 09-01-PLAN.md
+Phase: 09 - Upload (complete)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-01-17 — Completed 09-02-PLAN.md
 
-Progress: ██████░░░░ 6/19 plans (32%)
+Progress: ███████░░░ 7/19 plans (37%)
 
 ## Milestone v2.0 Overview
 
@@ -27,7 +27,7 @@ Progress: ██████░░░░ 6/19 plans (32%)
 |-------|-------|-------|--------|
 | 07 | Setup & Auth | 3 | Complete (3/3) |
 | 08 | Layout & Components | 2 | Complete (2/2) |
-| 09 | Upload | 2 | In progress (1/2) |
+| 09 | Upload | 2 | Complete (2/2) |
 | 10 | Dashboard | 2 | Pending |
 | 11 | Details & Review | 3 | Pending |
 | 12 | Reports & Audit | 2 | Pending |
@@ -64,6 +64,9 @@ Progress: ██████░░░░ 6/19 plans (32%)
 | Class ErrorBoundary | React requires class components for componentDidCatch | 08-02 |
 | Native drag-drop events | No external library (react-dropzone), uses HTML5 API | 09-01 |
 | File validation before callback | Validate type/size before passing file to parent | 09-01 |
+| TanStack Query for API | Mutations, polling, caching via react-query | 09-02 |
+| 2-second polling interval | Balance between responsiveness and server load | 09-02 |
+| Services layer pattern | API calls in services/, wrapped by hooks | 09-02 |
 
 ### API Endpoints Needed
 
@@ -79,12 +82,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 09-01-PLAN.md (Upload Interface)
+Stopped at: Completed 09-02-PLAN.md (Upload Progress & API Integration)
 Resume file: None
 
 ## Next Action
 
-Continue with Phase 09 plan 02:
+Start Phase 10 (Dashboard):
 ```
-/gsd:execute-plan .planning/phases/09-upload/09-02-PLAN.md
+/gsd:plan-phase 10
 ```
