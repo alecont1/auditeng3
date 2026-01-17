@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 
 ## Current Position
 
-Phase: 07 - Setup & Auth (complete)
-Plan: 3 of 3 in current phase
-Status: Phase 07 complete, ready for Phase 08
-Last activity: 2026-01-17 — Completed 07-03-PLAN.md
+Phase: 08 - Layout & Components (in progress)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-17 — Completed 08-01-PLAN.md
 
-Progress: ███░░░░░░░ 3/19 plans (16%)
+Progress: ████░░░░░░ 4/19 plans (21%)
 
 ## Milestone v2.0 Overview
 
@@ -26,7 +26,7 @@ Progress: ███░░░░░░░ 3/19 plans (16%)
 | Phase | Focus | Plans | Status |
 |-------|-------|-------|--------|
 | 07 | Setup & Auth | 3 | Complete (3/3) |
-| 08 | Layout & Components | 2 | Pending |
+| 08 | Layout & Components | 2 | In progress (1/2) |
 | 09 | Upload | 2 | Pending |
 | 10 | Dashboard | 2 | Pending |
 | 11 | Details & Review | 3 | Pending |
@@ -57,6 +57,9 @@ Progress: ███░░░░░░░ 3/19 plans (16%)
 | Custom auth:logout event | Decouples API interceptor from React context | 07-02 |
 | React Router v6 | Modern declarative routing with Routes/Route | 07-03 |
 | ProtectedRoute pattern | Wrapper checks isAuthenticated, shows loading while checking | 07-03 |
+| Fixed sidebar 240px | Standard SaaS app shell width, overlay on mobile | 08-01 |
+| NavLink for navigation | Uses react-router-dom NavLink for automatic active state | 08-01 |
+| MainLayout wrapper pattern | Protected routes wrapped in MainLayout for consistent shell | 08-01 |
 
 ### API Endpoints Needed
 
@@ -72,12 +75,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 07-03-PLAN.md (Login page + Protected routes)
+Stopped at: Completed 08-01-PLAN.md (App Shell & Navigation)
 Resume file: None
 
 ## Next Action
 
-Phase 07 complete. Continue with Phase 08:
+Plan 08-01 complete. Continue with Plan 08-02:
 ```
-/gsd:plan-phase 08
+/gsd:execute-plan 08-02
 ```
