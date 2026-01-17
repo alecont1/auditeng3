@@ -1,13 +1,29 @@
-import { Button } from "@/components/ui/button"
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { LoginPage, DashboardPage } from '@/pages'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 function App() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center gap-4">
-      <h1 className="text-3xl font-bold text-foreground">AuditEng Dashboard</h1>
-      <Button>Click me</Button>
-      <Button variant="outline">Outline</Button>
-      <Button variant="destructive">Destructive</Button>
-    </div>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* Protected routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Catch all - redirect to dashboard (will bounce to login if not auth) */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   )
 }
 
