@@ -42,3 +42,34 @@ export interface AnalysisSummary {
   created_at: string
   updated_at: string
 }
+
+/**
+ * Pagination metadata from backend
+ */
+export interface PaginationMeta {
+  page: number
+  per_page: number
+  total: number
+  total_pages: number
+}
+
+/**
+ * Query params for list analyses endpoint
+ */
+export interface ListAnalysesParams {
+  page?: number
+  per_page?: number
+  status?: 'pending' | 'completed' | 'failed'
+  date_from?: string
+  date_to?: string
+  sort_by?: 'created_at' | 'compliance_score'
+  sort_order?: 'asc' | 'desc'
+}
+
+/**
+ * Response from GET /api/analyses
+ */
+export interface ListAnalysesResponse {
+  items: AnalysisSummary[]
+  meta: PaginationMeta
+}

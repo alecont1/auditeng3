@@ -1,5 +1,10 @@
 import api from '@/lib/api'
-import type { SubmitAnalysisResponse, TaskStatusResponse } from '@/types'
+import type {
+  SubmitAnalysisResponse,
+  TaskStatusResponse,
+  ListAnalysesParams,
+  ListAnalysesResponse,
+} from '@/types'
 
 /**
  * Submit document for analysis
@@ -36,5 +41,15 @@ export async function submitAnalysis(
  */
 export async function getTaskStatus(taskId: string): Promise<TaskStatusResponse> {
   const response = await api.get<TaskStatusResponse>(`/tasks/${taskId}`)
+  return response.data
+}
+
+/**
+ * Get paginated list of analyses
+ */
+export async function getAnalyses(
+  params: ListAnalysesParams = {}
+): Promise<ListAnalysesResponse> {
+  const response = await api.get<ListAnalysesResponse>('/analyses', { params })
   return response.data
 }
