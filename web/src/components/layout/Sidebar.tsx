@@ -2,7 +2,6 @@ import { NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { LayoutDashboard, Upload, FileSearch, FileText, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 
 interface SidebarProps {
   open: boolean

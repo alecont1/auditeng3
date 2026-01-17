@@ -1,4 +1,4 @@
-import { LogOut, User } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import {
   DropdownMenu,
