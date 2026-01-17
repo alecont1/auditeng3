@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { LoginPage, DashboardPage } from '@/pages'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { MainLayout } from '@/components/layout'
 
 function App() {
   return (
@@ -8,12 +9,14 @@ function App() {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected routes */}
+      {/* Protected routes with layout */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <MainLayout>
+              <DashboardPage />
+            </MainLayout>
           </ProtectedRoute>
         }
       />
