@@ -1,10 +1,62 @@
 import { useState } from 'react'
-import { FileDropzone, FilePreview } from '@/components/upload'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+import { FileDropzone, FilePreview, UploadProgress } from '@/components/upload'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { useUpload, useTaskStatus } from '@/hooks'
 
 export function UploadPage() {
+  const navigate = useNavigate()
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [taskId, setTaskId] = useState<string | null>(null)
+
+  const { upload, isUploading, progress, reset } = useUpload()
+
+  const { data: taskStatus } = useTaskStatus({
+    taskId,
+    onCompleted: (data) => {
+      toast.success('Analysis complete!')
+      navigate(`/analysis/${data.result?.analysis_id}`)
+    },
+    onFailed: (error) => {
+      toast.error(error)
+      reset()
+      setTaskId(null)
+      setSelectedFile(null)
+    },
+  })
+
+  const handleSubmit = async () => {
+    if (!selectedFile) return
+    try {
+      const result = await upload(selectedFile)
+      setTaskId(result.task_id)
+    } catch {
+      toast.error('Upload failed. Please try again.')
+    }
+  }
+
+  const isProcessing = isUploading || !!taskId
+
+  // Show progress during upload/processing
+  if (isProcessing) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Uploading Document</h1>
+          <p className="text-muted-foreground">
+            Please wait while we process your file
+          </p>
+        </div>
+        <UploadProgress
+          uploadProgress={progress}
+          taskStatus={taskStatus?.status}
+          taskProgress={taskStatus?.progress}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -20,7 +72,7 @@ export function UploadPage() {
       ) : (
         <div className="space-y-4">
           <FilePreview file={selectedFile} onRemove={() => setSelectedFile(null)} />
-          <Button className="w-full" size="lg">
+          <Button className="w-full" size="lg" onClick={handleSubmit}>
             Start Analysis
           </Button>
         </div>
