@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 Phase: 07 - Setup & Auth (in progress)
 Plan: 2 of 3 in current phase
 Status: Executing Phase 07
-Last activity: 2026-01-17 — Completed 07-02-PLAN.md
+Last activity: 2026-01-17 — Completed 07-01-PLAN.md
 
 Progress: ██░░░░░░░░ 2/19 plans (10%)
 
@@ -51,6 +51,8 @@ Progress: ██░░░░░░░░ 2/19 plans (10%)
 | React + Vite over Next.js | SPA sufficient, simpler setup, no SSR needed | Confirmed |
 | shadcn/ui components | Copy-paste ownership, Tailwind native, no lock-in | Confirmed |
 | TanStack Query | Superior caching, refetching, simpler than Redux | Confirmed |
+| Tailwind v3 over v4 | shadcn/ui compatibility requires v3 | 07-01 |
+| CSS variables theming | Enables light/dark mode switching | 07-01 |
 | localStorage for token | Simple for SPA, no SSR needed | 07-02 |
 | Custom auth:logout event | Decouples API interceptor from React context | 07-02 |
 
@@ -68,7 +70,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 07-02-PLAN.md (API client & auth context)
+Stopped at: Completed 07-01-PLAN.md (Vite + React + Tailwind + shadcn/ui)
 Resume file: None
 
 ## Next Action
