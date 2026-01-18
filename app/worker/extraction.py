@@ -13,9 +13,9 @@ from pathlib import Path
 from uuid import UUID
 
 import dramatiq
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.db.models import Analysis, Task
-from app.db.session import async_session_factory
 from app.schemas.enums import TaskStatus, TestType
 from app.services.extraction import process_document
 from app.services.finding import FindingService
@@ -54,6 +54,28 @@ def process_document_task(task_id: str) -> None:
     asyncio.run(_process_document_async(task_id))
 
 
+def _create_worker_session_factory():
+    """Create a fresh async session factory for the current event loop.
+
+    This avoids the 'Future attached to a different loop' error
+    that occurs when reusing engines across asyncio.run() calls.
+    """
+    raw_url = os.environ.get(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/auditeng",
+    )
+
+    # Convert postgres:// to postgresql+asyncpg://
+    db_url = raw_url
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif db_url.startswith("postgresql://") and "+asyncpg" not in db_url:
+        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    engine = create_async_engine(db_url, pool_pre_ping=True)
+    return async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
 async def _process_document_async(task_id: str) -> None:
     """Async implementation of document processing.
 
@@ -65,7 +87,10 @@ async def _process_document_async(task_id: str) -> None:
     task_uuid = UUID(task_id)
     logger.info(f"Starting document processing for task {task_id}")
 
-    async with async_session_factory() as session:
+    # Create fresh session factory for this event loop
+    session_factory = _create_worker_session_factory()
+
+    async with session_factory() as session:
         # 1. Get task and validate
         task = await session.get(Task, task_uuid)
         if not task:
