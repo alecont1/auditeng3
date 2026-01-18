@@ -10,8 +10,8 @@ import logging
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import func, select
 from sqlalchemy.orm import selectinload
 
 from app.core.auth import CurrentUser
@@ -29,10 +29,13 @@ from app.worker.extraction import process_document_task
 from app.worker.tasks import enqueue_task
 
 from .schemas import (
-    AnalysisSubmitResponse,
-    AnalysisStatusResponse,
+    AnalysisListItem,
+    AnalysisListResponse,
     AnalysisResponse,
+    AnalysisStatusResponse,
+    AnalysisSubmitResponse,
     FindingDetail,
+    PaginationMeta,
 )
 
 logger = logging.getLogger(__name__)
@@ -136,6 +139,128 @@ async def verify_analysis_ownership(
         )
 
     return analysis
+
+
+@router.get(
+    "",
+    response_model=AnalysisListResponse,
+    summary="List user's analyses",
+    description="Get paginated list of analyses belonging to current user with filtering and sorting.",
+    responses={
+        200: {"description": "Analyses list retrieved"},
+        401: {"description": "Not authenticated"},
+    },
+)
+async def list_analyses(
+    db: DbSession,
+    current_user: CurrentUser,
+    status_filter: str | None = Query(None, alias="status", description="Filter by task status (queued, processing, completed, failed)"),
+    date_from: datetime | None = Query(None, description="Filter by created_at >= date_from"),
+    date_to: datetime | None = Query(None, description="Filter by created_at <= date_to"),
+    sort_by: str = Query("created_at", description="Sort field: created_at or compliance_score"),
+    sort_order: str = Query("desc", description="Sort order: asc or desc"),
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
+) -> AnalysisListResponse:
+    """Get paginated list of analyses belonging to the current user.
+
+    Supports filtering by status and date range, and sorting by created_at or compliance_score.
+
+    Args:
+        db: Database session.
+        current_user: Authenticated user from JWT token.
+        status_filter: Optional filter by task status.
+        date_from: Optional filter for analyses created on or after this date.
+        date_to: Optional filter for analyses created on or before this date.
+        sort_by: Field to sort by (created_at or compliance_score).
+        sort_order: Sort direction (asc or desc).
+        page: Page number (1-indexed).
+        per_page: Number of items per page.
+
+    Returns:
+        AnalysisListResponse: Paginated list of analyses with metadata.
+    """
+    # Build base query joining Analysis with Task
+    query = (
+        select(Analysis)
+        .join(Task, Analysis.task_id == Task.id)
+        .options(selectinload(Analysis.task))
+        .where(Task.user_id == current_user.id)
+    )
+
+    # Apply optional status filter
+    if status_filter:
+        query = query.where(Task.status == status_filter)
+
+    # Apply optional date range filters
+    if date_from:
+        query = query.where(Analysis.created_at >= date_from)
+    if date_to:
+        query = query.where(Analysis.created_at <= date_to)
+
+    # Count total before pagination
+    count_query = (
+        select(func.count())
+        .select_from(Analysis)
+        .join(Task, Analysis.task_id == Task.id)
+        .where(Task.user_id == current_user.id)
+    )
+    if status_filter:
+        count_query = count_query.where(Task.status == status_filter)
+    if date_from:
+        count_query = count_query.where(Analysis.created_at >= date_from)
+    if date_to:
+        count_query = count_query.where(Analysis.created_at <= date_to)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Apply sorting (validate sort_by)
+    if sort_by not in ("created_at", "compliance_score"):
+        sort_by = "created_at"
+
+    sort_column = getattr(Analysis, sort_by)
+    if sort_order.lower() == "asc":
+        query = query.order_by(sort_column.asc().nullslast())
+    else:
+        query = query.order_by(sort_column.desc().nullsfirst())
+
+    # Apply pagination
+    offset = (page - 1) * per_page
+    query = query.offset(offset).limit(per_page)
+
+    # Execute query
+    result = await db.execute(query)
+    analyses = result.scalars().all()
+
+    # Build response items
+    items = [
+        AnalysisListItem(
+            id=analysis.id,
+            equipment_type=analysis.equipment_type,
+            test_type=analysis.test_type,
+            equipment_tag=analysis.equipment_tag,
+            verdict=analysis.verdict,
+            compliance_score=analysis.compliance_score,
+            status=analysis.task.status,
+            created_at=analysis.created_at or datetime.now(timezone.utc),
+            original_filename=analysis.task.original_filename,
+        )
+        for analysis in analyses
+    ]
+
+    # Calculate total pages
+    total_pages = (total + per_page - 1) // per_page if total > 0 else 0
+
+    return AnalysisListResponse(
+        items=items,
+        pagination=PaginationMeta(
+            total=total,
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages,
+        ),
+    )
 
 
 @router.post(
