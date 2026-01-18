@@ -260,7 +260,7 @@ async def _process_document_async(task_id: str) -> None:
                         session,
                         analysis.id,
                         finding.rule_id,
-                        finding.severity.value,
+                        finding.severity.value if hasattr(finding.severity, 'value') else finding.severity,
                         finding.message,
                     )
                 except Exception as audit_err:

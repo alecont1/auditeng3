@@ -72,7 +72,7 @@ def finding_to_response(finding: Finding) -> FindingResponse:
     """Convert Finding to API response."""
     return FindingResponse(
         rule_id=finding.rule_id,
-        severity=finding.severity.value,
+        severity=finding.severity.value if hasattr(finding.severity, 'value') else finding.severity,
         message=finding.message,
         field_path=finding.field_path,
         extracted_value=finding.extracted_value,
