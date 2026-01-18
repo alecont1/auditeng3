@@ -7,6 +7,8 @@ Includes automatic validation of extraction results with finding generation.
 
 import asyncio
 import logging
+import os
+import tempfile
 from pathlib import Path
 from uuid import UUID
 
@@ -86,11 +88,32 @@ async def _process_document_async(task_id: str) -> None:
         logger.info(f"Task {task_id} status updated to PROCESSING")
 
         try:
-            # 3. Run extraction
-            file_path = Path(task.file_path)
-            result = await process_document(task_uuid, file_path)
+            # 3. Download file from R2
+            from app.services.storage import get_file
 
-            # 4. Extract equipment info if available
+            # Parse object key to get filename
+            object_key = task.file_path  # Now stores R2 object key
+            filename = object_key.split("/")[-1] if "/" in object_key else object_key
+
+            file_content = await get_file(task_uuid, filename)
+            if not file_content:
+                raise FileNotFoundError(f"File not found in R2: {object_key}")
+
+            # Write to temp file for extraction
+            with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{filename}") as tmp:
+                tmp.write(file_content)
+                temp_path = tmp.name
+
+            try:
+                # 4. Run extraction
+                file_path = Path(temp_path)
+                result = await process_document(task_uuid, file_path)
+            finally:
+                # Cleanup temp file
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+
+            # 5. Extract equipment info if available
             equipment_type = None
             equipment_tag = None
             test_type_str = None
