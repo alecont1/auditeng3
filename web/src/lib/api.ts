@@ -37,8 +37,13 @@ export function hasToken(): boolean {
  * - Development: Empty string (uses Vite proxy)
  */
 function getBaseURL(): string {
-  const envUrl = import.meta.env.VITE_API_URL
+  let envUrl = import.meta.env.VITE_API_URL
   if (envUrl) {
+    // Ensure URL has protocol - auto-add https:// if missing
+    // This prevents treating the URL as a relative path
+    if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
+      envUrl = `https://${envUrl}`
+    }
     // Production: Use full URL, ensure /api prefix
     return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
   }
