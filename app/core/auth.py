@@ -1,7 +1,7 @@
 """JWT authentication and password hashing utilities for AuditEng.
 
 This module provides:
-- Password hashing using bcrypt via passlib
+- Password hashing using bcrypt directly (passlib has compatibility issues)
 - JWT token generation and verification using python-jose
 - FastAPI dependency for protected routes
 """
@@ -9,10 +9,10 @@ This module provides:
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
+import bcrypt
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,9 +20,6 @@ from app.config import get_settings
 from app.core.dependencies import get_db
 from app.core.exceptions import AuthenticationError
 from app.db.models.user import User
-
-# Password hashing context using bcrypt
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme for token extraction from Authorization header
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -40,7 +37,10 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string.
     """
-    return pwd_context.hash(password)
+    password_bytes = password.encode("utf-8")
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -53,7 +53,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if passwords match, False otherwise.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        password_bytes = plain_password.encode("utf-8")
+        hashed_bytes = hashed_password.encode("utf-8")
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
+    except Exception:
+        return False
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
