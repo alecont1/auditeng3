@@ -3,7 +3,6 @@
 from app.services.storage import (
     delete_task_files,
     get_file,
-    get_file_path,
     save_file,
 )
 from app.services.extraction import (
@@ -33,7 +32,6 @@ __all__ = [
     # Storage
     "delete_task_files",
     "get_file",
-    "get_file_path",
     "save_file",
     # Extraction
     "detect_test_type",
