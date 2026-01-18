@@ -27,7 +27,10 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # CORS configuration - explicit origins only, no wildcards
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+
+    # Frontend URL for production (set via environment variable)
+    FRONTEND_URL: str = ""
 
     # File upload configuration
     UPLOAD_DIR: str = "./uploads"

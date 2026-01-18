@@ -191,10 +191,19 @@ def create_app() -> FastAPI:
             f"Rate limiting enabled: {settings.RATE_LIMIT_PER_MINUTE} requests/minute"
         )
 
-    # Add CORS middleware with explicit origins (no wildcards)
+    # Build CORS origins list
+    cors_origins = list(settings.CORS_ORIGINS)
+
+    # Add production frontend URL if configured
+    if settings.FRONTEND_URL:
+        cors_origins.append(settings.FRONTEND_URL)
+
+    # Add CORS middleware with explicit origins
+    # Note: For Vercel preview deployments, use allow_origin_regex
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
+        allow_origins=cors_origins,
+        allow_origin_regex=r"https://.*\.vercel\.app",  # Allow all Vercel preview deployments
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         allow_headers=["*"],
