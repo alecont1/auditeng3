@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 
 ## Current Position
 
-Phase: 10 of 8 (Dashboard) - Complete
+Phase: 12 of 14 (Reports & Audit) - Complete
 Plan: 2 of 2 in current phase
 Status: Phase complete
-Last activity: 2026-01-17 — Completed 10-02-PLAN.md
+Last activity: 2026-01-17 — Completed 12-02-PLAN.md (Audit Trail)
 
-Progress: █████████░ 9/19 plans (47%)
+Progress: ██████████ 11/19 plans (58%)
 
 ## Milestone v2.0 Overview
 
@@ -29,8 +29,8 @@ Progress: █████████░ 9/19 plans (47%)
 | 08 | Layout & Components | 2 | Complete (2/2) |
 | 09 | Upload | 2 | Complete (2/2) |
 | 10 | Dashboard | 2 | Complete (2/2) |
-| 11 | Details & Review | 3 | Pending |
-| 12 | Reports & Audit | 2 | Pending |
+| 11 | Details & Review | 3 | Complete (3/3) |
+| 12 | Reports & Audit | 2 | Complete (2/2) |
 | 13 | Backend Extensions | 2 | Pending |
 | 14 | Polish & Deploy | 3 | Pending |
 
@@ -73,6 +73,13 @@ Progress: █████████░ 9/19 plans (47%)
 | Filter "all" value | undefined represents no filter (mapped from "all" string) | 10-02 |
 | Combined sort dropdown | Single dropdown combines sort field and direction | 10-02 |
 | Approximate stats | QuickStats computed from current page until backend stats endpoint | 10-02 |
+| useState over useMutation for download | Download triggers file save, not cache update | 12-01 |
+| Header positioning for download | Logically separate from approve/reject actions | 12-01 |
+| Disabled via verdict check | Backend returns 400 for incomplete analyses | 12-01 |
+| Client-side filtering for audit | ~100 events max, simpler than round-tripping to server | 12-02 |
+| 30s stale time for audit | Audit trails don't change often, reduces API calls | 12-02 |
+| Intl.DateTimeFormat for timestamps | Native browser API, no external dependency | 12-02 |
+| Color-coded event categories | Visual categorization: blue=extraction, green=validation, amber=finding, purple=review | 12-02 |
 
 ### API Endpoints Needed
 
@@ -88,12 +95,12 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-17
-Stopped at: Completed 10-02-PLAN.md (Filters & Sorting) - Phase 10 complete
+Stopped at: Completed 12-02-PLAN.md (Audit Trail) - Phase 12 complete
 Resume file: None
 
 ## Next Action
 
-Start Phase 11 (Details & Review):
+Start Phase 13 (Backend Extensions):
 ```
-/gsd:plan-phase 11
+/gsd:plan-phase 13
 ```
