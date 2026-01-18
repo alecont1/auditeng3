@@ -26,7 +26,21 @@ export function LoginPage() {
       await login({ email, password })
       navigate('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
+      // Provide user-friendly error messages
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred'
+
+      // Check for common error patterns
+      if (errorMessage.includes('401') || errorMessage.toLowerCase().includes('invalid') ||
+          errorMessage.toLowerCase().includes('incorrect') || errorMessage.toLowerCase().includes('unauthorized')) {
+        setError('Invalid email or password. Please check your credentials.')
+      } else if (errorMessage.toLowerCase().includes('network') ||
+                 errorMessage.toLowerCase().includes('timeout') ||
+                 errorMessage.includes('ECONNREFUSED') ||
+                 err instanceof TypeError) {
+        setError('Unable to connect to server. Please check your internet connection.')
+      } else {
+        setError(errorMessage || 'Login failed. Please try again.')
+      }
     } finally {
       setIsLoading(false)
     }

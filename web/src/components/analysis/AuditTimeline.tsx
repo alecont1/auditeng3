@@ -70,7 +70,7 @@ function EmptyState() {
         <Filter className="h-12 w-12 mx-auto mb-4 opacity-50" />
         <p className="text-lg font-medium">No audit events found</p>
         <p className="text-sm mt-1">
-          Try adjusting your filter or check back later.
+          No events match the current filter. Try selecting "All Events" or check back later.
         </p>
       </div>
     </div>

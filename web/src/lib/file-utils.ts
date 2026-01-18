@@ -18,14 +18,14 @@ export function validateFile(file: File): FileValidationResult {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `Invalid file type. Allowed: PDF, JPEG, PNG, WebP`,
+      error: 'Only PDF and image files are supported (JPEG, PNG, WebP).',
     }
   }
 
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `File too large. Maximum size is 50MB`,
+      error: 'File exceeds 50MB limit. Please select a smaller file.',
     }
   }
 

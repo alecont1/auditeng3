@@ -32,8 +32,18 @@ export function UploadPage() {
     try {
       const result = await upload(selectedFile)
       setTaskId(result.task_id)
-    } catch {
-      toast.error('Upload failed. Please try again.')
+    } catch (error) {
+      // Provide specific error messages
+      const errorMessage = error instanceof Error ? error.message : ''
+      if (errorMessage.toLowerCase().includes('network') ||
+          errorMessage.toLowerCase().includes('timeout') ||
+          error instanceof TypeError) {
+        toast.error('Unable to connect. Please check your internet and try again.')
+      } else if (errorMessage.includes('413') || errorMessage.toLowerCase().includes('too large')) {
+        toast.error('File is too large. Maximum size is 50MB.')
+      } else {
+        toast.error('Upload failed. Please try again.')
+      }
     }
   }
 
