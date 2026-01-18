@@ -11,10 +11,17 @@ from sqlalchemy.ext.asyncio import (
 
 
 # Database URL from environment
-DATABASE_URL = os.environ.get(
+_raw_url = os.environ.get(
     "DATABASE_URL",
     "postgresql+asyncpg://postgres:postgres@localhost:5432/auditeng",
 )
+
+# Convert postgres:// or postgresql:// to postgresql+asyncpg:// for async driver
+DATABASE_URL = _raw_url
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 # Enable SQL echo in debug mode
 DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
