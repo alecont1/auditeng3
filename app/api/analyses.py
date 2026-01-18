@@ -257,7 +257,7 @@ async def list_analyses(
 
     return AnalysisListResponse(
         items=items,
-        pagination=PaginationMeta(
+        meta=PaginationMeta(
             total=total,
             page=page,
             per_page=per_page,

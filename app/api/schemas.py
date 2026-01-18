@@ -124,7 +124,7 @@ class AnalysisListResponse(BaseModel):
     """Paginated response for analysis list."""
 
     items: list[AnalysisListItem] = Field(default_factory=list, description="List of analysis items")
-    pagination: PaginationMeta = Field(..., description="Pagination metadata")
+    meta: PaginationMeta = Field(..., description="Pagination metadata")
 
     model_config = {"from_attributes": True}
 
