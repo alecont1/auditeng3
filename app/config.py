@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     RATE_LIMIT_PER_MINUTE: int = 10
     RATE_LIMIT_ENABLED: bool = True
 
+    # Cloudflare R2 configuration
+    R2_ACCOUNT_ID: str = ""
+    R2_ACCESS_KEY_ID: str = ""
+    R2_SECRET_ACCESS_KEY: str = ""
+    R2_BUCKET_NAME: str = "auditeng-uploads"
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
