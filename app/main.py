@@ -196,16 +196,25 @@ def create_app() -> FastAPI:
 
     # Add production frontend URL if configured
     if settings.FRONTEND_URL:
-        cors_origins.append(settings.FRONTEND_URL)
+        # Strip trailing slash if present to ensure consistent matching
+        frontend_url = settings.FRONTEND_URL.rstrip("/")
+        cors_origins.append(frontend_url)
+        logger.info(f"CORS: Added FRONTEND_URL to allowed origins: {frontend_url}")
 
-    # Add CORS middleware with explicit origins
-    # Note: For Vercel/Railway preview deployments, use allow_origin_regex
+    logger.info(f"CORS: Configured origins: {cors_origins}")
+
+    # Regex pattern for Vercel and Railway preview deployments
+    # Matches: https://*.vercel.app, https://*.railway.app, https://*.up.railway.app
+    cors_origin_regex = r"https://[a-zA-Z0-9-]+\.(?:vercel\.app|railway\.app|up\.railway\.app)"
+    logger.info(f"CORS: Origin regex pattern: {cors_origin_regex}")
+
+    # Add CORS middleware with explicit origins and regex pattern
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
-        allow_origin_regex=r"https://.*\.(vercel\.app|railway\.app|up\.railway\.app)",  # Allow Vercel and Railway deployments
+        allow_origin_regex=cors_origin_regex,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allow_headers=["*"],
     )
 

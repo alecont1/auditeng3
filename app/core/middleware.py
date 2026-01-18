@@ -8,6 +8,7 @@ This module provides:
 """
 
 import logging
+import re
 import time
 from typing import Callable
 
@@ -20,6 +21,43 @@ from app.config import get_settings
 from app.core.auth import verify_token
 
 logger = logging.getLogger(__name__)
+
+
+def _get_cors_headers_for_origin(origin: str | None) -> dict[str, str]:
+    """Generate CORS headers for a given origin.
+
+    Args:
+        origin: The request Origin header value.
+
+    Returns:
+        Dictionary of CORS headers if origin is allowed, empty dict otherwise.
+    """
+    if not origin:
+        return {}
+
+    settings = get_settings()
+
+    # Build allowed origins list
+    allowed_origins = list(settings.CORS_ORIGINS)
+    if settings.FRONTEND_URL:
+        allowed_origins.append(settings.FRONTEND_URL.rstrip("/"))
+
+    # Check if origin is in explicit list
+    if origin in allowed_origins:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+
+    # Check against regex pattern for Railway/Vercel preview deployments
+    cors_origin_regex = r"https://[a-zA-Z0-9-]+\.(?:vercel\.app|railway\.app|up\.railway\.app)"
+    if re.fullmatch(cors_origin_regex, origin):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+
+    return {}
 
 
 def get_rate_limit_key(request: Request) -> str:
@@ -121,6 +159,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         Returns:
             Response from the handler or 429 if rate limited.
         """
+        # Skip rate limiting for OPTIONS preflight requests (CORS)
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Skip rate limiting for health checks and docs
         if request.url.path in [
             "/api/health",
@@ -138,6 +180,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         is_allowed, count, seconds_until_reset = await check_rate_limit_redis(key, limit)
 
         if not is_allowed:
+            # Include CORS headers in rate limit response
+            origin = request.headers.get("origin")
+            cors_headers = _get_cors_headers_for_origin(origin)
+
             return JSONResponse(
                 status_code=429,
                 content={
@@ -150,6 +196,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     "X-RateLimit-Remaining": "0",
                     "X-RateLimit-Reset": str(int(time.time()) + seconds_until_reset),
                     "Retry-After": str(seconds_until_reset),
+                    **cors_headers,
                 },
             )
 

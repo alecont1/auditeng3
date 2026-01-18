@@ -5,6 +5,7 @@ JSON response formatting.
 """
 
 import logging
+import re
 import traceback
 from datetime import datetime, timezone
 
@@ -12,7 +13,54 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from app.config import get_settings
+
 logger = logging.getLogger(__name__)
+
+
+def _get_cors_headers(request: Request) -> dict[str, str]:
+    """Generate CORS headers for error responses.
+
+    This is needed because exception handlers bypass the CORS middleware,
+    so we must manually add CORS headers to error responses.
+
+    Args:
+        request: The incoming request to extract Origin header from.
+
+    Returns:
+        Dictionary of CORS headers if origin is allowed, empty dict otherwise.
+    """
+    origin = request.headers.get("origin")
+    if not origin:
+        return {}
+
+    settings = get_settings()
+
+    # Build allowed origins list
+    allowed_origins = list(settings.CORS_ORIGINS)
+    if settings.FRONTEND_URL:
+        allowed_origins.append(settings.FRONTEND_URL.rstrip("/"))
+
+    # Check if origin is in explicit list
+    if origin in allowed_origins:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+
+    # Check against regex pattern for Railway/Vercel preview deployments
+    cors_origin_regex = r"https://[a-zA-Z0-9-]+\.(?:vercel\.app|railway\.app|up\.railway\.app)"
+    if re.fullmatch(cors_origin_regex, origin):
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+
+    return {}
 
 
 class ErrorResponse(BaseModel):
@@ -123,7 +171,7 @@ async def audit_eng_exception_handler(
         exc: The raised AuditEngException.
 
     Returns:
-        JSONResponse with ErrorResponse body.
+        JSONResponse with ErrorResponse body and CORS headers.
     """
     error_response = ErrorResponse(
         error_code=exc.error_code,
@@ -140,9 +188,13 @@ async def audit_eng_exception_handler(
         },
     )
 
+    # Include CORS headers since exception handlers bypass CORS middleware
+    cors_headers = _get_cors_headers(request)
+
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump(mode="json"),
+        headers=cors_headers,
     )
 
 
@@ -160,7 +212,7 @@ async def generic_exception_handler(
         exc: The unhandled exception.
 
     Returns:
-        JSONResponse with generic 500 error.
+        JSONResponse with generic 500 error and CORS headers.
     """
     # Log full traceback for debugging
     logger.error(
@@ -177,7 +229,11 @@ async def generic_exception_handler(
         timestamp=datetime.now(timezone.utc),
     )
 
+    # Include CORS headers since exception handlers bypass CORS middleware
+    cors_headers = _get_cors_headers(request)
+
     return JSONResponse(
         status_code=500,
         content=error_response.model_dump(mode="json"),
+        headers=cors_headers,
     )
