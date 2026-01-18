@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** "IA extrai, codigo valida" — AI extraction + deterministic validation ensures reproducibility, explainability, and traceability of every finding.
-**Current focus:** v2.0 Web Dashboard — React frontend for AuditEng
+**Current focus:** v2.0 Web Dashboard + R2 Storage Integration
 
 ## Current Position
 
-Phase: 14 of 14 (Polish & Deploy)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-17 — Completed 14-02-PLAN.md (UX Polish)
+Phase: 15 of 15 (R2 Storage)
+Plan: 1 of 1 in current phase
+Status: Complete (requires user setup)
+Last activity: 2026-01-18 — Completed 15-01-PLAN.md (R2 Storage Integration)
 
-Progress: ██████████████████░░ 18/19 plans (95%)
+Progress: ████████████████████ 20/20 plans (100%)
 
 ## Milestone v2.0 Overview
 
@@ -32,14 +32,15 @@ Progress: ██████████████████░░ 18/19 pla
 | 11 | Details & Review | 3 | Complete (3/3) |
 | 12 | Reports & Audit | 2 | Complete (2/2) |
 | 13 | Backend Extensions | 2 | Complete (2/2) |
-| 14 | Polish & Deploy | 3 | In progress (2/3) |
+| 14 | Polish & Deploy | 3 | Complete (3/3) |
+| 15 | R2 Storage | 1 | Complete (1/1) |
 
 ## Performance Metrics
 
 **v1.0 Milestone (Shipped):**
 - Total plans completed: 27
 - Total phases: 6
-- Duration: 2 days (2026-01-15 → 2026-01-16)
+- Duration: 2 days (2026-01-15 -> 2026-01-16)
 - Codebase: 13,142 LOC Python, 92 files
 
 ## Accumulated Context
@@ -85,6 +86,9 @@ Progress: ██████████████████░░ 18/19 pla
 | keepPreviousData for pagination | Prevents table flash during page changes | 14-02 |
 | 768px breakpoint for sidebar | Standard tablet width, more useful than 1024px | 14-02 |
 | Error status code checks | Distinguish 400/404 from network errors for specific messages | 14-02 |
+| Cloudflare R2 via boto3 | S3-compatible object storage for cross-container file access | 15-01 |
+| Object key in file_path | Reuses existing column, stores "uuid/filename" format | 15-01 |
+| Temp file for extraction | Worker downloads to temp, processes, cleans up in finally | 15-01 |
 
 ### API Endpoints (Phase 13 Complete)
 
@@ -95,17 +99,22 @@ All backend extensions for v2.0 are now available:
 
 ### Blockers/Concerns
 
-None.
+**User Setup Required (15-01):** R2 environment variables must be set in Railway dashboard before file uploads will work in production. See `.planning/phases/15-r2-storage/15-01-SUMMARY.md` for details.
 
 ## Session Continuity
 
-Last session: 2026-01-17
-Stopped at: Completed 14-02-PLAN.md (UX Polish)
+Last session: 2026-01-18
+Stopped at: Completed 15-01-PLAN.md (R2 Storage Integration)
 Resume file: None
 
 ## Next Action
 
-Execute final plan in Phase 14:
+User setup required - set R2 environment variables in Railway:
+```bash
+R2_ACCOUNT_ID=<your-cloudflare-account-id>
+R2_ACCESS_KEY_ID=<your-r2-api-token-access-key>
+R2_SECRET_ACCESS_KEY=<your-r2-api-token-secret>
+R2_BUCKET_NAME=auditeng-uploads
 ```
-/gsd:execute-plan 14-03
-```
+
+After setting env vars, redeploy backend-api and worker services.
