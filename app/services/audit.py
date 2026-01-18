@@ -28,6 +28,8 @@ class EventType(StrEnum):
     VALIDATION_RULE_APPLIED = "validation_rule_applied"
     FINDING_GENERATED = "finding_generated"
     VALIDATION_COMPLETED = "validation_completed"
+    HUMAN_REVIEW_APPROVED = "human_review_approved"
+    HUMAN_REVIEW_REJECTED = "human_review_rejected"
 
 
 class AuditService:
@@ -252,6 +254,49 @@ class AuditService:
         )
         result = await db.execute(stmt)
         return list(result.scalars().all())
+
+    @staticmethod
+    async def log_human_review(
+        db: AsyncSession,
+        analysis_id: uuid.UUID,
+        action: str,
+        user_id: uuid.UUID,
+        reason: Optional[str] = None,
+    ) -> AuditLog:
+        """Log a human review action (approve/reject).
+
+        Args:
+            db: Database session.
+            analysis_id: ID of the analysis being reviewed.
+            action: "approved" or "rejected".
+            user_id: ID of the user performing the review.
+            reason: Optional rejection reason (required for rejections).
+
+        Returns:
+            Created AuditLog record.
+        """
+        event_type = (
+            EventType.HUMAN_REVIEW_APPROVED
+            if action == "approved"
+            else EventType.HUMAN_REVIEW_REJECTED
+        )
+
+        details: Dict[str, Any] = {
+            "action": action,
+            "reviewer_id": str(user_id),
+        }
+        if reason:
+            details["reason"] = reason
+
+        log = AuditLog(
+            id=uuid.uuid4(),
+            analysis_id=analysis_id,
+            event_type=event_type,
+            event_timestamp=datetime.now(timezone.utc),
+            details=details,
+        )
+        db.add(log)
+        return log
 
 
 async def log_event(
