@@ -52,6 +52,14 @@ class Settings(BaseSettings):
     R2_SECRET_ACCESS_KEY: str = ""
     R2_BUCKET_NAME: str = "auditeng-uploads"
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Strip whitespace from R2 settings (Railway env vars can have trailing newlines)
+        object.__setattr__(self, 'R2_ACCOUNT_ID', self.R2_ACCOUNT_ID.strip())
+        object.__setattr__(self, 'R2_ACCESS_KEY_ID', self.R2_ACCESS_KEY_ID.strip())
+        object.__setattr__(self, 'R2_SECRET_ACCESS_KEY', self.R2_SECRET_ACCESS_KEY.strip())
+        object.__setattr__(self, 'R2_BUCKET_NAME', self.R2_BUCKET_NAME.strip())
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
