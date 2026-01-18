@@ -199,11 +199,11 @@ def create_app() -> FastAPI:
         cors_origins.append(settings.FRONTEND_URL)
 
     # Add CORS middleware with explicit origins
-    # Note: For Vercel preview deployments, use allow_origin_regex
+    # Note: For Vercel/Railway preview deployments, use allow_origin_regex
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
-        allow_origin_regex=r"https://.*\.vercel\.app",  # Allow all Vercel preview deployments
+        allow_origin_regex=r"https://.*\.(vercel\.app|railway\.app|up\.railway\.app)",  # Allow Vercel and Railway deployments
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         allow_headers=["*"],
