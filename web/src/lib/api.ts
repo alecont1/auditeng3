@@ -32,10 +32,25 @@ export function hasToken(): boolean {
 }
 
 /**
+ * Get base URL for API requests.
+ * - Production: Uses VITE_API_URL environment variable
+ * - Development: Empty string (uses Vite proxy)
+ */
+function getBaseURL(): string {
+  const envUrl = import.meta.env.VITE_API_URL
+  if (envUrl) {
+    // Production: Use full URL, ensure /api prefix
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+  }
+  // Development: Empty baseURL uses Vite proxy (/api -> localhost:8000)
+  return '/api'
+}
+
+/**
  * Axios instance configured for AuditEng API
  */
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
