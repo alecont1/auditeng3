@@ -7,7 +7,7 @@ Status information is stored in Redis with automatic TTL expiration.
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, TypedDict
 
@@ -83,7 +83,7 @@ def create_job(job_id: str) -> None:
     client = _get_redis_client()
     job_info: JobInfo = {
         "status": JobStatus.QUEUED.value,
-        "queued_at": datetime.utcnow().isoformat(),
+        "queued_at": datetime.now(timezone.utc).isoformat(),
         "started_at": None,
         "completed_at": None,
         "error": None,
@@ -119,7 +119,7 @@ def set_job_status(
     else:
         job_info = {
             "status": JobStatus.QUEUED.value,
-            "queued_at": datetime.utcnow().isoformat(),
+            "queued_at": datetime.now(timezone.utc).isoformat(),
             "started_at": None,
             "completed_at": None,
             "error": None,
@@ -130,7 +130,7 @@ def set_job_status(
     job_info["status"] = status.value
 
     # Update timestamps based on status
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(timezone.utc).isoformat()
     if status == JobStatus.PROCESSING:
         job_info["started_at"] = now
     elif status in (JobStatus.COMPLETED, JobStatus.FAILED):

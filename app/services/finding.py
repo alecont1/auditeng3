@@ -48,7 +48,8 @@ class FindingService:
         )
 
         # Map validation severity to schema severity
-        severity = FindingSeverity(validation_finding.severity.value)
+        severity_val = validation_finding.severity.value if hasattr(validation_finding.severity, 'value') else validation_finding.severity
+        severity = FindingSeverity(severity_val)
 
         return FindingCreate(
             analysis_id=analysis_id,
@@ -103,7 +104,7 @@ class FindingService:
         db_findings = [
             FindingModel(
                 analysis_id=finding.analysis_id,
-                severity=finding.severity.value,
+                severity=finding.severity.value if hasattr(finding.severity, 'value') else finding.severity,
                 rule_id=finding.rule_id,
                 message=finding.message,
                 evidence=finding.evidence.model_dump() if finding.evidence else None,
