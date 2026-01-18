@@ -34,9 +34,12 @@ from .schemas import (
     AnalysisResponse,
     AnalysisStatusResponse,
     AnalysisSubmitResponse,
+    ApproveRejectResponse,
     FindingDetail,
     PaginationMeta,
+    RejectRequest,
 )
+from app.services.audit import AuditService
 
 logger = logging.getLogger(__name__)
 
@@ -498,4 +501,163 @@ async def get_analysis_results(
         findings=findings,
         extraction_result=analysis.extraction_result,
         created_at=analysis.created_at or datetime.now(timezone.utc),
+    )
+
+
+@router.put(
+    "/{analysis_id}/approve",
+    response_model=ApproveRejectResponse,
+    summary="Approve analysis",
+    description="Mark a completed analysis as approved. Requires ownership.",
+    responses={
+        200: {"description": "Analysis approved"},
+        400: {"description": "Analysis not completed or already has verdict"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Access denied"},
+        404: {"description": "Analysis not found"},
+    },
+)
+async def approve_analysis(
+    analysis_id: UUID,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> ApproveRejectResponse:
+    """Approve an analysis after human review.
+
+    Only allows approval of completed analyses that haven't already been
+    approved or rejected.
+
+    Args:
+        analysis_id: The analysis UUID.
+        db: Database session.
+        current_user: Authenticated user from JWT token.
+
+    Returns:
+        ApproveRejectResponse: Confirmation of approval with new verdict.
+
+    Raises:
+        HTTPException: 400 if analysis not completed or already reviewed.
+        HTTPException: 401 for missing/invalid authentication.
+        HTTPException: 403 if user doesn't own the analysis.
+        HTTPException: 404 if analysis not found.
+    """
+    analysis = await verify_analysis_ownership(db, analysis_id, current_user.id)
+
+    # Verify analysis is completed
+    if analysis.task.status != TaskStatus.COMPLETED.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Analysis must be completed before approval",
+        )
+
+    # Verify analysis can still be reviewed (not already approved/rejected)
+    if analysis.verdict not in (None, "review"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Analysis already has verdict: {analysis.verdict}",
+        )
+
+    # Update verdict
+    analysis.verdict = "approved"
+
+    # Log the human review action
+    await AuditService.log_human_review(
+        db=db,
+        analysis_id=analysis_id,
+        action="approved",
+        user_id=current_user.id,
+    )
+
+    await db.commit()
+
+    logger.info(
+        f"Analysis approved: analysis_id={analysis_id}, user_id={current_user.id}"
+    )
+
+    return ApproveRejectResponse(
+        analysis_id=analysis_id,
+        verdict="approved",
+        message="Analysis approved successfully",
+    )
+
+
+@router.put(
+    "/{analysis_id}/reject",
+    response_model=ApproveRejectResponse,
+    summary="Reject analysis",
+    description="Mark a completed analysis as rejected with reason. Requires ownership.",
+    responses={
+        200: {"description": "Analysis rejected"},
+        400: {"description": "Analysis not completed or already has verdict"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Access denied"},
+        404: {"description": "Analysis not found"},
+    },
+)
+async def reject_analysis(
+    analysis_id: UUID,
+    request: RejectRequest,
+    db: DbSession,
+    current_user: CurrentUser,
+) -> ApproveRejectResponse:
+    """Reject an analysis after human review.
+
+    Only allows rejection of completed analyses that haven't already been
+    approved or rejected. Requires a reason for rejection.
+
+    Args:
+        analysis_id: The analysis UUID.
+        request: RejectRequest with reason for rejection.
+        db: Database session.
+        current_user: Authenticated user from JWT token.
+
+    Returns:
+        ApproveRejectResponse: Confirmation of rejection with new verdict.
+
+    Raises:
+        HTTPException: 400 if analysis not completed or already reviewed.
+        HTTPException: 401 for missing/invalid authentication.
+        HTTPException: 403 if user doesn't own the analysis.
+        HTTPException: 404 if analysis not found.
+    """
+    analysis = await verify_analysis_ownership(db, analysis_id, current_user.id)
+
+    # Verify analysis is completed
+    if analysis.task.status != TaskStatus.COMPLETED.value:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Analysis must be completed before rejection",
+        )
+
+    # Verify analysis can still be reviewed (not already approved/rejected)
+    if analysis.verdict not in (None, "review"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Analysis already has verdict: {analysis.verdict}",
+        )
+
+    # Update verdict and rejection reason
+    analysis.verdict = "rejected"
+    analysis.rejection_reason = request.reason
+
+    # Log the human review action
+    await AuditService.log_human_review(
+        db=db,
+        analysis_id=analysis_id,
+        action="rejected",
+        user_id=current_user.id,
+        reason=request.reason,
+    )
+
+    await db.commit()
+
+    logger.info(
+        f"Analysis rejected: analysis_id={analysis_id}, user_id={current_user.id}, "
+        f"reason={request.reason[:50]}..."
+    )
+
+    return ApproveRejectResponse(
+        analysis_id=analysis_id,
+        verdict="rejected",
+        message="Analysis rejected successfully",
     )

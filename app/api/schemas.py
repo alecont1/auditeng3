@@ -127,3 +127,24 @@ class AnalysisListResponse(BaseModel):
     pagination: PaginationMeta = Field(..., description="Pagination metadata")
 
     model_config = {"from_attributes": True}
+
+
+class RejectRequest(BaseModel):
+    """Request body for rejecting an analysis."""
+
+    reason: str = Field(
+        ...,
+        min_length=10,
+        max_length=1000,
+        description="Reason for rejection (required, 10-1000 chars)"
+    )
+
+
+class ApproveRejectResponse(BaseModel):
+    """Response for approve/reject actions."""
+
+    analysis_id: UUID = Field(..., description="Analysis ID")
+    verdict: str = Field(..., description="New verdict (approved/rejected)")
+    message: str = Field(..., description="Success message")
+
+    model_config = {"from_attributes": True}
