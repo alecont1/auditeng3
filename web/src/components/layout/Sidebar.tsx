@@ -23,7 +23,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-60 bg-card border-r',
           'transform transition-transform duration-200 ease-in-out',
-          'lg:hidden',
+          'md:hidden',
           open ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -33,7 +33,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="lg:hidden"
+            className="md:hidden"
           >
             <X className="h-5 w-5" />
             <span className="sr-only">Close sidebar</span>
@@ -45,7 +45,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:w-60 lg:flex-col">
+      <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-60 md:flex-col">
         <div className="flex h-full flex-col bg-card border-r">
           {/* Logo */}
           <div className="flex h-16 items-center px-6 border-b">

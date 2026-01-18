@@ -15,7 +15,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -29,14 +29,14 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main content area */}
       <div className={cn(
-        'lg:pl-60', // Offset for fixed sidebar on desktop
+        'md:pl-60', // Offset for fixed sidebar on desktop/tablet
         'flex flex-col min-h-screen'
       )}>
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
         {/* Page content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 md:p-6">
           {children}
         </main>
       </div>

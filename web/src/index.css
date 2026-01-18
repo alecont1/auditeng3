@@ -57,3 +57,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile responsiveness utilities */
+@layer utilities {
+  /* Ensure tables scroll horizontally on small screens */
+  .table-responsive {
+    @apply overflow-x-auto;
+  }
+
+  /* Touch-friendly minimum tap target size (44px per Apple/Google guidelines) */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Prevent horizontal overflow on mobile */
+  .mobile-safe {
+    @apply overflow-x-hidden;
+  }
+}
