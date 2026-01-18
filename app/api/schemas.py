@@ -91,3 +91,39 @@ class AuditTrailResponse(BaseModel):
     events: list[AuditEventResponse] = Field(default_factory=list, description="Chronological list of audit events")
 
     model_config = {"from_attributes": True}
+
+
+class PaginationMeta(BaseModel):
+    """Pagination metadata for list responses."""
+
+    total: int = Field(..., ge=0, description="Total count of items")
+    page: int = Field(..., ge=1, description="Current page number (1-indexed)")
+    per_page: int = Field(..., ge=1, description="Number of items per page")
+    total_pages: int = Field(..., ge=0, description="Total number of pages")
+
+    model_config = {"from_attributes": True}
+
+
+class AnalysisListItem(BaseModel):
+    """Summary item for analysis list view."""
+
+    id: UUID = Field(..., description="Analysis ID")
+    equipment_type: str = Field(..., description="Type of equipment analyzed")
+    test_type: str = Field(..., description="Type of test performed")
+    equipment_tag: str | None = Field(None, description="Equipment identifier tag")
+    verdict: str | None = Field(None, description="Analysis verdict (approved/review/rejected)")
+    compliance_score: float | None = Field(None, ge=0, le=100, description="Compliance score 0-100")
+    status: str = Field(..., description="Current task status")
+    created_at: datetime = Field(..., description="When the analysis was created")
+    original_filename: str = Field(..., description="Original uploaded filename")
+
+    model_config = {"from_attributes": True}
+
+
+class AnalysisListResponse(BaseModel):
+    """Paginated response for analysis list."""
+
+    items: list[AnalysisListItem] = Field(default_factory=list, description="List of analysis items")
+    pagination: PaginationMeta = Field(..., description="Pagination metadata")
+
+    model_config = {"from_attributes": True}
