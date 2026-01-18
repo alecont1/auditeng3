@@ -5,6 +5,7 @@ import type {
   ListAnalysesParams,
   ListAnalysesResponse,
   AnalysisDetail,
+  AuditTrailResponse,
 } from '@/types'
 
 /**
@@ -117,4 +118,19 @@ export async function downloadReport(analysisId: string): Promise<void> {
 
   // Cleanup: revoke object URL
   URL.revokeObjectURL(url)
+}
+
+/**
+ * Get audit trail for an analysis
+ * GET /api/analyses/{id}/audit
+ */
+export async function getAuditTrail(
+  analysisId: string,
+  params?: { skip?: number; limit?: number }
+): Promise<AuditTrailResponse> {
+  const response = await api.get<AuditTrailResponse>(
+    `/analyses/${analysisId}/audit`,
+    { params }
+  )
+  return response.data
 }
