@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import { getAnalyses } from '@/services'
 import type { ListAnalysesParams } from '@/types'
 
@@ -9,5 +9,7 @@ export function useAnalyses(params: ListAnalysesParams = {}) {
   return useQuery({
     queryKey: ['analyses', params],
     queryFn: () => getAnalyses(params),
+    // Keep previous data during pagination to prevent loading flash
+    placeholderData: keepPreviousData,
   })
 }
