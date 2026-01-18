@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "dramatiq app.worker.tasks --processes 1 --threads 4",
+    "startCommand": "python -m dramatiq app.worker.tasks --processes 1 --threads 4",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
