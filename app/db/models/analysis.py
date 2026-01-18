@@ -3,7 +3,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from sqlalchemy import Float, ForeignKey, String
+from sqlalchemy import Float, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -58,6 +58,10 @@ class Analysis(Base, TimestampMixin):
     )
     validation_result: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSON,
+        nullable=True,
+    )
+    rejection_reason: Mapped[Optional[str]] = mapped_column(
+        Text,
         nullable=True,
     )
 
