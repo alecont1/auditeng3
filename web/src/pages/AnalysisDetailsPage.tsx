@@ -1,5 +1,5 @@
-import { useParams } from 'react-router-dom'
-import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react'
+import { useParams, Link } from 'react-router-dom'
+import { Loader2, AlertTriangle, RefreshCw, FileText } from 'lucide-react'
 import { useAnalysis } from '@/hooks'
 import {
   AnalysisHeader,
@@ -118,10 +118,19 @@ export function AnalysisDetailsPage() {
           equipmentType={analysis.equipment_type}
           createdAt={analysis.created_at}
         />
-        <DownloadReportButton
-          analysisId={analysis.id}
-          disabled={!isCompleted}
-        />
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/analyses/${analysis.id}/audit`}
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <FileText className="h-4 w-4" />
+            View Audit Trail
+          </Link>
+          <DownloadReportButton
+            analysisId={analysis.id}
+            disabled={!isCompleted}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

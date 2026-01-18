@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { LoginPage, DashboardPage, UploadPage } from '@/pages'
+import { LoginPage, DashboardPage, UploadPage, AnalysisDetailsPage, AuditTrailPage } from '@/pages'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { MainLayout } from '@/components/layout'
 
@@ -27,6 +27,28 @@ function App() {
           <ProtectedRoute>
             <MainLayout>
               <UploadPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/analyses/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <AnalysisDetailsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/analyses/:analysisId/audit"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <AuditTrailPage />
             </MainLayout>
           </ProtectedRoute>
         }
