@@ -25,48 +25,143 @@ from app.schemas.enums import TestType
 logger = logging.getLogger(__name__)
 
 
-# Keywords for test type detection
+# Keywords for test type detection (weighted by specificity)
+# High-weight keywords are very specific to the test type
 TEST_TYPE_KEYWORDS: dict[str, list[str]] = {
     "grounding": [
+        # English terms
         "ground resistance",
         "earth resistance",
         "resistance to ground",
         "grounding test",
+        "grounding report",
+        "grounding system",
         "soil resistivity",
+        "ground grid",
+        "ground electrode",
+        "ground rod",
+        "ground mesh",
+        "fall of potential",
+        "3-point method",
+        "step voltage",
+        "touch voltage",
+        # Portuguese terms
         "aterramento",
         "resistência de aterramento",
+        "malha de aterramento",
+        "sistema de aterramento",
+        "eletrodo de aterramento",
+        "haste de aterramento",
+        # Common in reports
+        "ohm",  # Grounding uses low ohm values
+        "spda",  # Lightning protection system
+        "nbr 5419",
+        "nbr 5410",
+        "ieee 80",
+        "ieee 81",
     ],
     "megger": [
+        # English terms
         "insulation resistance",
         "megger",
         "ir test",
         "polarization index",
         "insulation test",
         "megaohm",
+        "dielectric absorption",
+        "absorption ratio",
+        "pi test",
+        "dar test",
+        # Portuguese terms
         "resistência de isolação",
+        "resistência de isolamento",
         "isolamento",
+        "teste de isolação",
+        "índice de polarização",
+        # Common in reports
+        "ieee 43",
+        "neta",
+        "1 minute",
+        "10 minute",
     ],
     "thermography": [
+        # English terms
         "thermal",
         "infrared",
         "thermograph",
+        "thermographic",
         "temperature",
         "hotspot",
+        "hot spot",
         "delta-t",
+        "delta t",
+        "emissivity",
+        "thermal image",
+        "ir inspection",
+        "thermal inspection",
+        "thermal scan",
+        # Portuguese terms
         "termografia",
         "termográfico",
+        "termográfica",
         "imagem térmica",
+        "ponto quente",
+        "inspeção térmica",
+        "análise térmica",
+        # Common in reports
+        "flir",
+        "fluke",
+        "°c",  # Celsius symbol
+        "celsius",
     ],
 }
 
 
-def detect_test_type(content: str) -> TestType | None:
+def detect_test_type_from_filename(filename: str) -> TestType | None:
+    """Detect test type from filename.
+
+    Fallback detection using filename patterns.
+
+    Args:
+        filename: Name of the file (with or without path).
+
+    Returns:
+        TestType enum value, or None if unable to detect.
+    """
+    filename_lower = filename.lower()
+
+    # Check for explicit test type indicators in filename
+    filename_patterns = {
+        "grounding": ["grounding", "ground", "aterramento", "spda", "earth"],
+        "megger": ["megger", "insulation", "isolamento", "isolação", "ir-test"],
+        "thermography": [
+            "thermo",
+            "thermal",
+            "termograf",
+            "infrared",
+            "ir-scan",
+            "flir",
+        ],
+    }
+
+    for test_type, patterns in filename_patterns.items():
+        for pattern in patterns:
+            if pattern in filename_lower:
+                logger.info(f"Detected test type from filename: {test_type}")
+                return TestType(test_type)
+
+    return None
+
+
+def detect_test_type(content: str, filename: str | None = None) -> TestType | None:
     """Detect test type from document content using keyword matching.
 
     Uses weighted keyword matching to identify the test type.
+    Falls back to filename detection if content-based detection fails.
 
     Args:
         content: Text content from the document.
+        filename: Optional filename for fallback detection.
 
     Returns:
         TestType enum value, or None if unable to detect.
@@ -87,7 +182,10 @@ def detect_test_type(content: str) -> TestType | None:
     # Get the type with highest score
     max_score = max(scores.values())
     if max_score == 0:
-        logger.warning("Could not detect test type from content")
+        logger.warning("Could not detect test type from content, trying filename")
+        # Fallback to filename detection
+        if filename:
+            return detect_test_type_from_filename(filename)
         return None
 
     detected = max(scores, key=lambda k: scores[k])
@@ -240,10 +338,10 @@ async def process_document(
         all_text = "\n".join(text for _, text in pages)
 
         if not test_type:
-            test_type = detect_test_type(all_text)
+            test_type = detect_test_type(all_text, filename=file_path.name)
             if not test_type:
                 raise ValueError(
-                    "Could not auto-detect test type. "
+                    "Could not auto-detect test type from content or filename. "
                     "Please specify test_type parameter."
                 )
 
