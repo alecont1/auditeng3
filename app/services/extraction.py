@@ -247,7 +247,7 @@ async def extract_pdf_images(
     file_path: Path,
     min_width: int = 200,
     min_height: int = 200,
-    max_images: int = 20,
+    max_images: int = 100,  # Allow more images, batch processing handles API limits
     max_size_bytes: int = 5_000_000,  # 5MB per image max
 ) -> list[tuple[int, bytes]]:
     """Extract images from PDF for thermal analysis.

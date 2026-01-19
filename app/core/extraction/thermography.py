@@ -5,6 +5,7 @@ using Claude Vision, with hotspot detection and severity classification per NETA
 """
 
 import base64
+import logging
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -16,6 +17,8 @@ from app.core.extraction.schemas import (
     EquipmentInfo,
     FieldConfidence,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class HotspotSeverity(StrEnum):
@@ -217,26 +220,125 @@ class ThermographyExtractor(BaseExtractor):
         """Return the Pydantic model for thermography extraction."""
         return ThermographyExtractionResult
 
+    # Maximum images per API call to stay under request size limits
+    BATCH_SIZE: int = 10
+
     async def extract_from_images(
         self,
         images: list[bytes],
         page_numbers: list[int] | None = None,
     ) -> ThermographyExtractionResult:
-        """Extract thermal data from image bytes.
+        """Extract thermal data from image bytes with batch processing.
 
-        Convenience method that handles base64 encoding of raw image bytes.
+        Processes images in batches to handle large documents without
+        exceeding API request size limits. Results are merged into a
+        single comprehensive result.
 
         Args:
             images: List of image bytes (thermal images).
             page_numbers: Optional page numbers for tracking.
 
         Returns:
-            ThermographyExtractionResult: Hotspot analysis results.
+            ThermographyExtractionResult: Hotspot analysis results from all batches.
         """
-        # Convert images to base64
-        b64_images = [base64.b64encode(img).decode() for img in images]
+        if not images:
+            raise ValueError("No images provided for thermography extraction")
 
-        return await self.extract(content=b64_images, page_numbers=page_numbers)
+        # If within batch size, process directly
+        if len(images) <= self.BATCH_SIZE:
+            b64_images = [base64.b64encode(img).decode() for img in images]
+            return await self.extract(content=b64_images, page_numbers=page_numbers)
+
+        # Process in batches
+        logger.info(
+            f"Processing {len(images)} images in batches of {self.BATCH_SIZE}"
+        )
+
+        all_results: list[ThermographyExtractionResult] = []
+        for batch_idx in range(0, len(images), self.BATCH_SIZE):
+            batch_end = min(batch_idx + self.BATCH_SIZE, len(images))
+            batch_images = images[batch_idx:batch_end]
+            batch_pages = (
+                page_numbers[batch_idx:batch_end] if page_numbers else None
+            )
+
+            logger.info(
+                f"Processing batch {batch_idx // self.BATCH_SIZE + 1}: "
+                f"images {batch_idx + 1}-{batch_end} of {len(images)}"
+            )
+
+            b64_images = [base64.b64encode(img).decode() for img in batch_images]
+            result = await self.extract(content=b64_images, page_numbers=batch_pages)
+            all_results.append(result)
+
+        # Merge all batch results
+        return self._merge_results(all_results)
+
+    def _merge_results(
+        self, results: list[ThermographyExtractionResult]
+    ) -> ThermographyExtractionResult:
+        """Merge multiple batch results into a single result.
+
+        Takes the base metadata from the first result and aggregates
+        hotspots from all results.
+
+        Args:
+            results: List of extraction results from batches.
+
+        Returns:
+            ThermographyExtractionResult: Merged result with all hotspots.
+        """
+        if not results:
+            raise ValueError("No results to merge")
+
+        if len(results) == 1:
+            return results[0]
+
+        # Use first result as base (equipment info, test conditions, etc.)
+        base = results[0]
+
+        # Aggregate all hotspots
+        all_hotspots: list[Hotspot] = []
+        all_errors: list[str] = []
+        all_page_numbers: list[int] = []
+        confidence_sum = 0.0
+
+        for result in results:
+            all_hotspots.extend(result.hotspots)
+            all_errors.extend(result.extraction_errors)
+            if result.metadata and result.metadata.page_numbers:
+                all_page_numbers.extend(result.metadata.page_numbers)
+            confidence_sum += result.overall_confidence
+
+        # Calculate average confidence
+        avg_confidence = confidence_sum / len(results)
+
+        # Create merged result
+        merged = ThermographyExtractionResult(
+            equipment=base.equipment,
+            calibration=base.calibration,
+            test_conditions=base.test_conditions,
+            thermal_data=base.thermal_data,
+            hotspots=all_hotspots,
+            overall_confidence=avg_confidence,
+            extraction_errors=all_errors,
+            metadata=base.metadata,
+        )
+
+        # Update metadata with all page numbers
+        if merged.metadata and all_page_numbers:
+            merged.metadata.page_numbers = sorted(set(all_page_numbers))
+
+        # Recalculate needs_review
+        merged.needs_review = self._check_needs_review(merged)
+
+        logger.info(
+            f"Merged {len(results)} batch results: "
+            f"{len(all_hotspots)} total hotspots, "
+            f"confidence={avg_confidence:.2f}"
+        )
+
+        return merged
 
     def _check_needs_review(self, result: ThermographyExtractionResult) -> bool:
         """Check if thermography extraction needs human review.
