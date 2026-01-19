@@ -243,20 +243,33 @@ async def extract_pdf_text(file_path: Path) -> list[tuple[int, str]]:
     return pages
 
 
-async def extract_pdf_images(file_path: Path) -> list[tuple[int, bytes]]:
+async def extract_pdf_images(
+    file_path: Path,
+    min_width: int = 200,
+    min_height: int = 200,
+    max_images: int = 20,
+    max_size_bytes: int = 5_000_000,  # 5MB per image max
+) -> list[tuple[int, bytes]]:
     """Extract images from PDF for thermal analysis.
 
     Extracts embedded images that may contain thermal camera captures.
+    Filters out small images (logos, icons) and limits total count to avoid
+    exceeding API request size limits.
 
     Args:
         file_path: Path to the PDF file.
+        min_width: Minimum image width to include (filters logos/icons).
+        min_height: Minimum image height to include.
+        max_images: Maximum number of images to return (largest first).
+        max_size_bytes: Maximum size per image in bytes.
 
     Returns:
         List of (page_number, image_bytes) tuples.
     """
     import pymupdf
 
-    images: list[tuple[int, bytes]] = []
+    # Collect all candidate images with metadata
+    candidates: list[tuple[int, bytes, int, int, int]] = []  # (page, bytes, width, height, size)
 
     doc = pymupdf.open(file_path)
     try:
@@ -267,10 +280,29 @@ async def extract_pdf_images(file_path: Path) -> list[tuple[int, bytes]]:
                 try:
                     base_image = doc.extract_image(xref)
                     image_bytes = base_image["image"]
-                    images.append((page_num, image_bytes))
+                    width = base_image.get("width", 0)
+                    height = base_image.get("height", 0)
+
+                    # Filter: skip small images (likely logos, icons, borders)
+                    if width < min_width or height < min_height:
+                        logger.debug(
+                            f"Skipping small image {img_index + 1} from page {page_num}: "
+                            f"{width}x{height} (min: {min_width}x{min_height})"
+                        )
+                        continue
+
+                    # Filter: skip oversized images
+                    if len(image_bytes) > max_size_bytes:
+                        logger.warning(
+                            f"Skipping oversized image {img_index + 1} from page {page_num}: "
+                            f"{len(image_bytes)} bytes (max: {max_size_bytes})"
+                        )
+                        continue
+
+                    candidates.append((page_num, image_bytes, width, height, len(image_bytes)))
                     logger.debug(
-                        f"Extracted image {img_index + 1} from page {page_num} "
-                        f"({len(image_bytes)} bytes)"
+                        f"Found thermal image candidate on page {page_num}: "
+                        f"{width}x{height}, {len(image_bytes)} bytes"
                     )
                 except Exception as e:
                     logger.warning(
@@ -279,7 +311,22 @@ async def extract_pdf_images(file_path: Path) -> list[tuple[int, bytes]]:
     finally:
         doc.close()
 
-    logger.info(f"Extracted {len(images)} images from PDF")
+    logger.info(f"Found {len(candidates)} thermal image candidates")
+
+    # Sort by size (larger images are more likely to be thermal captures)
+    # and take top N
+    candidates.sort(key=lambda x: x[2] * x[3], reverse=True)  # Sort by area
+    selected = candidates[:max_images]
+
+    # Sort back by page order for logical processing
+    selected.sort(key=lambda x: x[0])
+
+    images = [(page, img_bytes) for page, img_bytes, _, _, _ in selected]
+
+    logger.info(
+        f"Selected {len(images)} images from {len(candidates)} candidates "
+        f"(max: {max_images})"
+    )
     return images
 
 
