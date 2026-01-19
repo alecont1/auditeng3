@@ -8,9 +8,11 @@ This module provides the extraction pipeline orchestration:
 """
 
 import logging
+from io import BytesIO
 from pathlib import Path
 from uuid import UUID
 
+from PIL import Image
 from pydantic import BaseModel
 
 from app.core.extraction import (
@@ -243,18 +245,75 @@ async def extract_pdf_text(file_path: Path) -> list[tuple[int, str]]:
     return pages
 
 
+def _resize_image_if_needed(
+    image_bytes: bytes,
+    max_dimension: int = 8000,
+) -> bytes:
+    """Resize image if any dimension exceeds max_dimension.
+
+    Claude API has a limit of 8000 pixels per dimension.
+    This function resizes images that exceed this limit while
+    maintaining aspect ratio.
+
+    Args:
+        image_bytes: Original image bytes.
+        max_dimension: Maximum allowed dimension (default: 8000).
+
+    Returns:
+        Resized image bytes (JPEG format) or original if no resize needed.
+    """
+    try:
+        img = Image.open(BytesIO(image_bytes))
+        width, height = img.size
+
+        # Check if resize is needed
+        if width <= max_dimension and height <= max_dimension:
+            return image_bytes
+
+        # Calculate new dimensions maintaining aspect ratio
+        if width > height:
+            new_width = max_dimension
+            new_height = int(height * (max_dimension / width))
+        else:
+            new_height = max_dimension
+            new_width = int(width * (max_dimension / height))
+
+        logger.info(
+            f"Resizing image from {width}x{height} to {new_width}x{new_height} "
+            f"(max dimension: {max_dimension})"
+        )
+
+        # Resize with high quality
+        resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        # Convert to RGB if necessary (for JPEG output)
+        if resized.mode in ("RGBA", "P"):
+            resized = resized.convert("RGB")
+
+        # Save to bytes
+        output = BytesIO()
+        resized.save(output, format="JPEG", quality=85)
+        return output.getvalue()
+
+    except Exception as e:
+        logger.warning(f"Failed to resize image: {e}, returning original")
+        return image_bytes
+
+
 async def extract_pdf_images(
     file_path: Path,
     min_width: int = 200,
     min_height: int = 200,
     max_images: int = 100,  # Allow more images, batch processing handles API limits
     max_size_bytes: int = 5_000_000,  # 5MB per image max
+    max_dimension: int = 8000,  # Claude API limit
 ) -> list[tuple[int, bytes]]:
     """Extract images from PDF for thermal analysis.
 
     Extracts embedded images that may contain thermal camera captures.
     Filters out small images (logos, icons) and limits total count to avoid
-    exceeding API request size limits.
+    exceeding API request size limits. Images exceeding max_dimension are
+    automatically resized.
 
     Args:
         file_path: Path to the PDF file.
@@ -262,6 +321,7 @@ async def extract_pdf_images(
         min_height: Minimum image height to include.
         max_images: Maximum number of images to return (largest first).
         max_size_bytes: Maximum size per image in bytes.
+        max_dimension: Maximum dimension for Claude API (default: 8000).
 
     Returns:
         List of (page_number, image_bytes) tuples.
@@ -291,13 +351,23 @@ async def extract_pdf_images(
                         )
                         continue
 
-                    # Filter: skip oversized images
+                    # Filter: skip oversized images (by bytes)
                     if len(image_bytes) > max_size_bytes:
                         logger.warning(
                             f"Skipping oversized image {img_index + 1} from page {page_num}: "
                             f"{len(image_bytes)} bytes (max: {max_size_bytes})"
                         )
                         continue
+
+                    # Resize if dimensions exceed Claude API limit (8000 pixels)
+                    if width > max_dimension or height > max_dimension:
+                        image_bytes = _resize_image_if_needed(image_bytes, max_dimension)
+                        # Update dimensions after resize for sorting
+                        try:
+                            resized_img = Image.open(BytesIO(image_bytes))
+                            width, height = resized_img.size
+                        except Exception:
+                            pass  # Keep original dimensions if we can't read resized
 
                     candidates.append((page_num, image_bytes, width, height, len(image_bytes)))
                     logger.debug(
