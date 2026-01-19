@@ -37,4 +37,22 @@ describe('VerdictBadge', () => {
     const badge = screen.getByText('Approved')
     expect(badge).toHaveClass('custom-class')
   })
+
+  it('renders "Unknown" with gray styling when verdict is undefined', () => {
+    render(<VerdictBadge verdict={undefined} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('border-gray-300')
+    expect(badge).toHaveClass('text-gray-500')
+  })
+
+  it('renders "Unknown" with gray styling when verdict is null', () => {
+    render(<VerdictBadge verdict={null} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('border-gray-300')
+    expect(badge).toHaveClass('text-gray-500')
+  })
 })

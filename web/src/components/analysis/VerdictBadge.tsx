@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import type { Verdict } from '@/types'
 
 interface VerdictBadgeProps {
-  verdict: Verdict
+  verdict?: Verdict | null
   className?: string
 }
 
@@ -23,7 +23,15 @@ const verdictConfig: Record<Verdict, { label: string; className: string }> = {
 }
 
 export function VerdictBadge({ verdict, className }: VerdictBadgeProps) {
-  const config = verdictConfig[verdict]
+  const config = verdict ? verdictConfig[verdict] : null
+
+  if (!config) {
+    return (
+      <Badge variant="outline" className={cn('border-gray-300 text-gray-500 bg-transparent', className)}>
+        Unknown
+      </Badge>
+    )
+  }
 
   return (
     <Badge variant="outline" className={cn(config.className, className)}>

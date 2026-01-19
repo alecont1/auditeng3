@@ -36,4 +36,22 @@ describe('StatusBadge', () => {
     const badge = screen.getByText('Pending')
     expect(badge).toHaveClass('custom-class')
   })
+
+  it('renders "Unknown" with gray styling when status is undefined', () => {
+    render(<StatusBadge status={undefined} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-gray-100')
+    expect(badge).toHaveClass('text-gray-800')
+  })
+
+  it('renders "Unknown" with gray styling when status is null', () => {
+    render(<StatusBadge status={null} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-gray-100')
+    expect(badge).toHaveClass('text-gray-800')
+  })
 })

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 type Status = 'pending' | 'completed' | 'failed'
 
 interface StatusBadgeProps {
-  status: Status
+  status?: Status | null
   className?: string
 }
 
@@ -24,7 +24,15 @@ const statusConfig: Record<Status, { label: string; className: string }> = {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status]
+  const config = status ? statusConfig[status] : null
+
+  if (!config) {
+    return (
+      <Badge variant="outline" className={cn('bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-100', className)}>
+        Unknown
+      </Badge>
+    )
+  }
 
   return (
     <Badge variant="outline" className={cn(config.className, className)}>

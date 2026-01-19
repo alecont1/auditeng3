@@ -46,4 +46,22 @@ describe('SeverityBadge', () => {
     const badge = screen.getByText('Critical')
     expect(badge).toHaveClass('custom-class')
   })
+
+  it('renders "Unknown" with gray styling when severity is undefined', () => {
+    render(<SeverityBadge severity={undefined} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-gray-100')
+    expect(badge).toHaveClass('text-gray-800')
+  })
+
+  it('renders "Unknown" with gray styling when severity is null', () => {
+    render(<SeverityBadge severity={null} />)
+
+    const badge = screen.getByText('Unknown')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-gray-100')
+    expect(badge).toHaveClass('text-gray-800')
+  })
 })

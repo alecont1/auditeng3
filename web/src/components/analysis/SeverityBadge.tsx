@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 type Severity = 'critical' | 'major' | 'minor' | 'info'
 
 interface SeverityBadgeProps {
-  severity: Severity
+  severity?: Severity | null
   className?: string
 }
 
@@ -28,7 +28,15 @@ const severityConfig: Record<Severity, { label: string; className: string }> = {
 }
 
 export function SeverityBadge({ severity, className }: SeverityBadgeProps) {
-  const config = severityConfig[severity]
+  const config = severity ? severityConfig[severity] : null
+
+  if (!config) {
+    return (
+      <Badge variant="outline" className={cn('bg-gray-100 text-gray-800 border-gray-200', className)}>
+        Unknown
+      </Badge>
+    )
+  }
 
   return (
     <Badge variant="outline" className={cn(config.className, className)}>
