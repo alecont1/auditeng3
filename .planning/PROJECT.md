@@ -2,9 +2,9 @@
 
 ## Current State
 
-**Shipped:** v1.0 MVP (2026-01-16)
-**Codebase:** 13,142 LOC Python across 92 files
-**Tech stack:** FastAPI, SQLAlchemy 2.0, Pydantic v2, Dramatiq, PostgreSQL, Redis, Claude API
+**Shipped:** v2.0 Web Dashboard (2026-01-20)
+**Codebase:** ~38,000 LOC across 182 files (Python backend + TypeScript frontend)
+**Tech stack:** FastAPI, SQLAlchemy 2.0, Pydantic v2, Dramatiq, PostgreSQL, Redis, Claude API, React 18, Vite, Tailwind, shadcn/ui, TanStack Query, Cloudflare R2
 
 ## What This Is
 
