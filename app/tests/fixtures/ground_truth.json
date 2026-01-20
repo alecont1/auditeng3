@@ -1,0 +1,149 @@
+{
+  "version": "1.0",
+  "description": "Ground truth dataset for complementary validation benchmark",
+  "target_recall": 0.95,
+  "reports": [
+    {
+      "report_id": "rejected_001",
+      "file_path": "app/tests/fixtures/reports/rejected_001.pdf",
+      "expected_verdict": "rejected",
+      "expected_findings": [
+        {
+          "code": "CALIBRATION_EXPIRED",
+          "blocker": true,
+          "description": "Calibration certificate expired before inspection date"
+        }
+      ],
+      "pair_with": "approved_001",
+      "notes": "Calibration expiration test case"
+    },
+    {
+      "report_id": "approved_001",
+      "file_path": "app/tests/fixtures/reports/approved_001.pdf",
+      "expected_verdict": "approved",
+      "expected_findings": [],
+      "pair_with": "rejected_001",
+      "notes": "Corrected version of rejected_001 - valid calibration"
+    },
+    {
+      "report_id": "rejected_002",
+      "file_path": "app/tests/fixtures/reports/rejected_002.pdf",
+      "expected_verdict": "rejected",
+      "expected_findings": [
+        {
+          "code": "SERIAL_MISMATCH",
+          "blocker": true,
+          "description": "Camera serial in report differs from certificate photo"
+        }
+      ],
+      "pair_with": "approved_002",
+      "notes": "Serial number mismatch test case"
+    },
+    {
+      "report_id": "approved_002",
+      "file_path": "app/tests/fixtures/reports/approved_002.pdf",
+      "expected_verdict": "approved",
+      "expected_findings": [],
+      "pair_with": "rejected_002",
+      "notes": "Corrected version - matching serial numbers"
+    },
+    {
+      "report_id": "rejected_003",
+      "file_path": "app/tests/fixtures/reports/rejected_003.pdf",
+      "expected_verdict": "rejected",
+      "expected_findings": [
+        {
+          "code": "VALUE_MISMATCH",
+          "blocker": true,
+          "description": "Reflected temp in report differs from hygrometer reading"
+        }
+      ],
+      "pair_with": "approved_003",
+      "notes": "Temperature value mismatch test case"
+    },
+    {
+      "report_id": "approved_003",
+      "file_path": "app/tests/fixtures/reports/approved_003.pdf",
+      "expected_verdict": "approved",
+      "expected_findings": [],
+      "pair_with": "rejected_003",
+      "notes": "Corrected version - matching temperature values"
+    },
+    {
+      "report_id": "rejected_004",
+      "file_path": "app/tests/fixtures/reports/rejected_004.pdf",
+      "expected_verdict": "rejected",
+      "expected_findings": [
+        {
+          "code": "PHOTO_MISSING",
+          "blocker": true,
+          "description": "Phase B thermal image missing"
+        }
+      ],
+      "pair_with": "approved_004",
+      "notes": "Missing photo test case"
+    },
+    {
+      "report_id": "approved_004",
+      "file_path": "app/tests/fixtures/reports/approved_004.pdf",
+      "expected_verdict": "approved",
+      "expected_findings": [],
+      "pair_with": "rejected_004",
+      "notes": "Corrected version - all phase photos present"
+    },
+    {
+      "report_id": "rejected_005",
+      "file_path": "app/tests/fixtures/reports/rejected_005.pdf",
+      "expected_verdict": "rejected",
+      "expected_findings": [
+        {
+          "code": "SPEC_NON_COMPLIANCE",
+          "blocker": true,
+          "description": "Delta-T > 10C without required comments"
+        }
+      ],
+      "pair_with": "approved_005",
+      "notes": "SPEC compliance test case"
+    },
+    {
+      "report_id": "approved_005",
+      "file_path": "app/tests/fixtures/reports/approved_005.pdf",
+      "expected_verdict": "approved",
+      "expected_findings": [],
+      "pair_with": "rejected_005",
+      "notes": "Corrected version - proper comments for high delta-T"
+    }
+  ],
+  "finding_codes": {
+    "CALIBRATION_EXPIRED": {
+      "rule_id": "COMP-001",
+      "description": "Calibration certificate expired before measurement date",
+      "severity": "critical"
+    },
+    "SERIAL_MISMATCH": {
+      "rule_id": "COMP-002",
+      "description": "Camera serial number mismatch between report and certificate",
+      "severity": "critical"
+    },
+    "VALUE_MISMATCH": {
+      "rule_id": "COMP-003",
+      "description": "Reflected temperature mismatch between report and hygrometer",
+      "severity": "critical"
+    },
+    "PHOTO_MISSING": {
+      "rule_id": "COMP-004",
+      "description": "Required thermal image missing for one or more phases",
+      "severity": "critical"
+    },
+    "SPEC_NON_COMPLIANCE": {
+      "rule_id": "COMP-005",
+      "description": "Delta-T exceeds 10C without required documentation",
+      "severity": "critical"
+    },
+    "SERIAL_ILLEGIBLE": {
+      "rule_id": "COMP-006",
+      "description": "Serial number could not be read with sufficient confidence",
+      "severity": "major"
+    }
+  }
+}
