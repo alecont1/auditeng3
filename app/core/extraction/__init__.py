@@ -34,6 +34,12 @@ from app.core.extraction.megger import (
     MeggerMeasurement,
     MeggerTestConditions,
 )
+from app.core.extraction.ocr import (
+    CertificateOCRResult,
+    HygrometerOCRResult,
+    extract_certificate_serial,
+    extract_hygrometer_reading,
+)
 from app.core.extraction.thermography import (
     Hotspot,
     HotspotSeverity,
@@ -71,6 +77,11 @@ __all__ = [
     "MeggerExtractor",
     "MeggerMeasurement",
     "MeggerTestConditions",
+    # OCR (Complementary)
+    "CertificateOCRResult",
+    "HygrometerOCRResult",
+    "extract_certificate_serial",
+    "extract_hygrometer_reading",
     # Thermography
     "Hotspot",
     "HotspotSeverity",
