@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-17)
 
 **Core value:** "IA extrai, codigo valida" — AI extraction + deterministic validation ensures reproducibility, explainability, and traceability of every finding.
-**Current focus:** v2.0 Web Dashboard + R2 Storage Integration
+**Current focus:** v2.0 Web Dashboard + Complementary Validations
 
 ## Current Position
 
-Phase: 15 of 15 (R2 Storage)
-Plan: 1 of 1 in current phase
-Status: Complete (requires user setup)
-Last activity: 2026-01-18 — Completed 15-01-PLAN.md (R2 Storage Integration)
+Phase: 16 of 16 (Complementary Validations)
+Plan: 2 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-20 — Completed 16-02-PLAN.md (Ground Truth & Config)
 
-Progress: ████████████████████ 20/20 plans (100%)
+Progress: ██████████████████████ 22/24 plans (92%)
 
 ## Milestone v2.0 Overview
 
@@ -34,6 +34,7 @@ Progress: ████████████████████ 20/20 pla
 | 13 | Backend Extensions | 2 | Complete (2/2) |
 | 14 | Polish & Deploy | 3 | Complete (3/3) |
 | 15 | R2 Storage | 1 | Complete (1/1) |
+| 16 | Complementary Validations | 4 | In Progress (2/4) |
 
 ## Performance Metrics
 
@@ -70,7 +71,7 @@ Progress: ████████████████████ 20/20 pla
 | Services layer pattern | API calls in services/, wrapped by hooks | 09-02 |
 | Status badge colors | pending=amber, completed=green, failed=red | 10-01 |
 | Verdict badge colors | approved=green, rejected=red, needs_review=amber (outline) | 10-01 |
-| Compliance score thresholds | >=90% green, >=70% amber, <70% red | 10-01 |
+| Compliance score thresholds | >=90% green, >=70% amber, <70% red | 10-02 |
 | Filter "all" value | undefined represents no filter (mapped from "all" string) | 10-02 |
 | Combined sort dropdown | Single dropdown combines sort field and direction | 10-02 |
 | Approximate stats | QuickStats computed from current page until backend stats endpoint | 10-02 |
@@ -89,6 +90,8 @@ Progress: ████████████████████ 20/20 pla
 | Cloudflare R2 via boto3 | S3-compatible object storage for cross-container file access | 15-01 |
 | Object key in file_path | Reuses existing column, stores "uuid/filename" format | 15-01 |
 | Temp file for extraction | Worker downloads to temp, processes, cleans up in finally | 15-01 |
+| 95% target recall benchmark | Industry standard for safety-critical validation systems | 16-02 |
+| ComplementaryConfig thresholds | serial 0.7, temp 2.0C, delta-T 10.0C | 16-02 |
 
 ### API Endpoints (Phase 13 Complete)
 
@@ -103,18 +106,10 @@ All backend extensions for v2.0 are now available:
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Completed 15-01-PLAN.md (R2 Storage Integration)
+Last session: 2026-01-20
+Stopped at: Completed 16-02-PLAN.md (Ground Truth & Config)
 Resume file: None
 
 ## Next Action
 
-User setup required - set R2 environment variables in Railway:
-```bash
-R2_ACCOUNT_ID=<your-cloudflare-account-id>
-R2_ACCESS_KEY_ID=<your-r2-api-token-access-key>
-R2_SECRET_ACCESS_KEY=<your-r2-api-token-secret>
-R2_BUCKET_NAME=auditeng-uploads
-```
-
-After setting env vars, redeploy backend-api and worker services.
+Continue with Phase 16 Plan 03 - Implement complementary validators.
