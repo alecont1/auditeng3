@@ -212,6 +212,38 @@ class FATConfig(BaseModel):
     min_checklist_items: int = 1
 
 
+class ComplementaryConfig(BaseModel):
+    """Complementary validation settings.
+
+    Thresholds for cross-validation rules that complement
+    test-type specific validators. These validate consistency
+    between different parts of the report (e.g., serial numbers
+    on certificate vs photos, temperatures vs hygrometer readings).
+    """
+
+    # Serial number OCR confidence threshold
+    # Below this = SERIAL_ILLEGIBLE (review flag, not blocker)
+    serial_confidence_threshold: float = 0.7
+
+    # Temperature match tolerance in Celsius
+    # Reflected temp vs hygrometer reading can differ by this amount
+    temp_match_tolerance: float = 2.0
+
+    # SPEC compliance threshold (Microsoft standard)
+    spec_delta_t_threshold: float = 10.0
+
+    # Required keywords in COMMENTS section when delta > threshold
+    spec_required_keywords: list[str] = Field(
+        default_factory=lambda: [
+            "terminals", "insulators", "torque", "conductors",
+            "terminais", "isoladores", "torque", "condutores"  # Portuguese
+        ]
+    )
+
+    # Standard reference for complementary validations
+    standard_reference: str = "Microsoft SPEC 26 05 00"
+
+
 class ValidationConfig(BaseModel):
     """Complete validation configuration.
 
@@ -224,6 +256,7 @@ class ValidationConfig(BaseModel):
     thermography: ThermographyThresholds = Field(default_factory=ThermographyThresholds)
     calibration: CalibrationConfig = Field(default_factory=CalibrationConfig)
     fat: FATConfig = Field(default_factory=FATConfig)
+    complementary: ComplementaryConfig = Field(default_factory=ComplementaryConfig)
 
     # Active standard profile for this configuration
     active_standard: StandardProfile = StandardProfile.NETA
@@ -294,11 +327,16 @@ def get_config_for_standard(standard: StandardProfile) -> ValidationConfig:
         standard_reference=get_standard_reference(standard, "calibration", "max_days_expired"),
     )
 
+    # ComplementaryConfig uses defaults for both NETA and Microsoft
+    # These are cross-validation rules that apply regardless of standard
+    complementary = ComplementaryConfig()
+
     return ValidationConfig(
         grounding=grounding,
         megger=megger,
         thermography=thermography,
         calibration=calibration,
+        complementary=complementary,
         active_standard=standard,
     )
 
