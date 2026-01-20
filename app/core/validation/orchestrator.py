@@ -6,9 +6,11 @@ Coordinates all validators to produce complete validation results.
 from app.core.extraction.fat import FATExtractionResult
 from app.core.extraction.grounding import GroundingExtractionResult
 from app.core.extraction.megger import MeggerExtractionResult
+from app.core.extraction.ocr import CertificateOCRResult, HygrometerOCRResult
 from app.core.extraction.schemas import BaseExtractionResult
 from app.core.extraction.thermography import ThermographyExtractionResult
 from app.core.validation.calibration import CalibrationValidator
+from app.core.validation.complementary import ComplementaryValidator
 from app.core.validation.config import ValidationConfig, get_validation_config
 from app.core.validation.cross_field import CrossFieldValidator
 from app.core.validation.fat import FATValidator
@@ -41,12 +43,24 @@ class ValidationOrchestrator:
         self.fat_validator = FATValidator(self.config)
         self.calibration_validator = CalibrationValidator(self.config)
         self.cross_field_validator = CrossFieldValidator(self.config)
+        self.complementary_validator = ComplementaryValidator(self.config)
 
-    def validate(self, extraction: BaseExtractionResult) -> ValidationResult:
+    def validate(
+        self,
+        extraction: BaseExtractionResult,
+        certificate_ocr: CertificateOCRResult | None = None,
+        hygrometer_ocr: HygrometerOCRResult | None = None,
+        report_comments: str | None = None,
+        expected_phases: list[str] | None = None,
+    ) -> ValidationResult:
         """Validate extraction using appropriate validators.
 
         Args:
             extraction: The extraction result to validate.
+            certificate_ocr: Optional OCR result from calibration certificate.
+            hygrometer_ocr: Optional OCR result from thermo-hygrometer photo.
+            report_comments: Optional comments section text for SPEC compliance.
+            expected_phases: Optional list of expected phase identifiers.
 
         Returns:
             ValidationResult with all findings combined.
@@ -85,6 +99,17 @@ class ValidationOrchestrator:
         # Apply cross-field validation
         cross_result = self.cross_field_validator.validate(extraction)
         all_findings.extend(cross_result.findings)
+
+        # Apply complementary validations (for thermography only)
+        if isinstance(extraction, ThermographyExtractionResult):
+            comp_result = self.complementary_validator.validate(
+                extraction,
+                certificate_ocr=certificate_ocr,
+                hygrometer_ocr=hygrometer_ocr,
+                expected_phases=expected_phases,
+                report_comments=report_comments,
+            )
+            all_findings.extend(comp_result.findings)
 
         return ValidationResult(
             test_type=test_type,
