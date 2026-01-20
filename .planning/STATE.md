@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 ## Current Position
 
 Phase: 16 of 16 (Complementary Validations)
-Plan: 2 of 4 in current phase
+Plan: 1 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-20 — Completed 16-02-PLAN.md (Ground Truth & Config)
+Last activity: 2026-01-20 — Completed 16-01-PLAN.md (OCR Extraction Infrastructure)
 
-Progress: ██████████████████████ 22/24 plans (92%)
+Progress: █████████████████████░ 21/25 plans (84%)
 
 ## Milestone v2.0 Overview
 
@@ -34,7 +34,7 @@ Progress: ██████████████████████ 22/
 | 13 | Backend Extensions | 2 | Complete (2/2) |
 | 14 | Polish & Deploy | 3 | Complete (3/3) |
 | 15 | R2 Storage | 1 | Complete (1/1) |
-| 16 | Complementary Validations | 4 | In Progress (2/4) |
+| 16 | Complementary Validations | 5 | In Progress (1/5) |
 
 ## Performance Metrics
 
@@ -90,8 +90,9 @@ Progress: ██████████████████████ 22/
 | Cloudflare R2 via boto3 | S3-compatible object storage for cross-container file access | 15-01 |
 | Object key in file_path | Reuses existing column, stores "uuid/filename" format | 15-01 |
 | Temp file for extraction | Worker downloads to temp, processes, cleans up in finally | 15-01 |
-| 95% target recall benchmark | Industry standard for safety-critical validation systems | 16-02 |
-| ComplementaryConfig thresholds | serial 0.7, temp 2.0C, delta-T 10.0C | 16-02 |
+| Separate OCR extraction module | OCR reusable across validation types, maintains extraction/validation separation | 16-01 |
+| FieldConfidence with source_text | Preserves extracted text for auditability and debugging | 16-01 |
+| Explicit confidence tiers in prompts | Helps Claude provide consistent confidence scores (0.95 for clear, etc.) | 16-01 |
 
 ### API Endpoints (Phase 13 Complete)
 
@@ -107,9 +108,9 @@ All backend extensions for v2.0 are now available:
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 16-02-PLAN.md (Ground Truth & Config)
+Stopped at: Completed 16-01-PLAN.md (OCR Extraction Infrastructure)
 Resume file: None
 
 ## Next Action
 
-Continue with Phase 16 Plan 03 - Implement complementary validators.
+Continue with Phase 16 Plan 02 - Ground Truth & Config.
