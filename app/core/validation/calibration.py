@@ -123,6 +123,19 @@ class CalibrationValidator(BaseValidator):
                 standard_reference="ISO/IEC 17025",
                 remediation="Recalibrate instrument before use. Test results may be invalid.",
             )
+        elif days_until_expiry == 0:
+            # Special case: expires TODAY - needs immediate attention
+            self.add_finding(
+                findings=findings,
+                rule_id="CALIB-005",
+                severity=ValidationSeverity.MAJOR,
+                message=f"Calibration expires TODAY ({expiration})",
+                field_path="calibration.expiration_date",
+                extracted_value=str(expiration),
+                threshold=f"warn_days={config.warn_days_before_expiry}",
+                standard_reference="ISO/IEC 17025",
+                remediation="Calibration expires today. Schedule immediate recalibration.",
+            )
         elif days_until_expiry <= config.warn_days_before_expiry:
             self.add_finding(
                 findings=findings,
