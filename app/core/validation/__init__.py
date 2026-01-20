@@ -38,6 +38,7 @@ from app.core.validation.schemas import (
     ValidationRule,
     ValidationSeverity,
 )
+from app.core.validation.complementary import ComplementaryValidator
 from app.core.validation.thermography import ThermographyValidator
 
 __all__ = [
@@ -50,6 +51,7 @@ __all__ = [
     "FATValidator",
     "CalibrationValidator",
     "CrossFieldValidator",
+    "ComplementaryValidator",
     # Orchestration
     "ValidationOrchestrator",
     "validate_extraction",
