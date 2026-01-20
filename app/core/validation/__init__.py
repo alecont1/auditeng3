@@ -39,6 +39,7 @@ from app.core.validation.schemas import (
     ValidationSeverity,
 )
 from app.core.validation.complementary import ComplementaryValidator
+from app.core.validation.instrument_serial import InstrumentSerialValidator
 from app.core.validation.thermography import ThermographyValidator
 
 __all__ = [
@@ -52,6 +53,7 @@ __all__ = [
     "CalibrationValidator",
     "CrossFieldValidator",
     "ComplementaryValidator",
+    "InstrumentSerialValidator",
     # Orchestration
     "ValidationOrchestrator",
     "validate_extraction",

@@ -15,6 +15,7 @@ from app.core.validation.config import ValidationConfig, get_validation_config
 from app.core.validation.cross_field import CrossFieldValidator
 from app.core.validation.fat import FATValidator
 from app.core.validation.grounding import GroundingValidator
+from app.core.validation.instrument_serial import InstrumentSerialValidator
 from app.core.validation.megger import MeggerValidator
 from app.core.validation.schemas import Finding, ValidationResult
 from app.core.validation.thermography import ThermographyValidator
@@ -44,6 +45,7 @@ class ValidationOrchestrator:
         self.calibration_validator = CalibrationValidator(self.config)
         self.cross_field_validator = CrossFieldValidator(self.config)
         self.complementary_validator = ComplementaryValidator(self.config)
+        self.instrument_serial_validator = InstrumentSerialValidator(self.config)
 
     def validate(
         self,
@@ -99,6 +101,14 @@ class ValidationOrchestrator:
         # Apply cross-field validation
         cross_result = self.cross_field_validator.validate(extraction)
         all_findings.extend(cross_result.findings)
+
+        # Apply instrument serial validation for all test types (except FAT)
+        # Per CAL-03: Serial instrumento != serial certificado = CRITICAL
+        if certificate_ocr and not isinstance(extraction, FATExtractionResult):
+            serial_result = self.instrument_serial_validator.validate(
+                extraction, certificate_ocr=certificate_ocr
+            )
+            all_findings.extend(serial_result.findings)
 
         # Apply complementary validations (for thermography only)
         if isinstance(extraction, ThermographyExtractionResult):
