@@ -124,6 +124,8 @@ class ThermographyTestConditions(BaseModel):
         load_conditions: Load during inspection (e.g., "75% rated load").
         camera_model: Thermal camera model.
         camera_serial: Camera serial number.
+        hygrometer_model: Thermo-hygrometer model.
+        hygrometer_serial: Thermo-hygrometer serial number.
     """
 
     inspection_date: FieldConfidence
@@ -131,6 +133,8 @@ class ThermographyTestConditions(BaseModel):
     load_conditions: FieldConfidence | None = None
     camera_model: FieldConfidence | None = None
     camera_serial: FieldConfidence | None = None
+    hygrometer_model: FieldConfidence | None = None
+    hygrometer_serial: FieldConfidence | None = None
 
 
 class ThermographyExtractionResult(BaseExtractionResult):

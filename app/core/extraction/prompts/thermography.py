@@ -17,10 +17,16 @@ You will receive thermal images. Extract the following information:
 - Note distance if displayed
 - Note ambient temperature if displayed
 
-## Equipment Information (from visible labels or accompanying photos)
-- Equipment TAG
+## Equipment Information (CRITICAL - Required for dashboard)
+- Equipment TAG (MANDATORY - look for it in these locations, in order of priority):
+  1. Report title/header (e.g., "CPQ11-COLO3-CE1-27(CE1_UPS02-CE1_MSB01)" → TAG = "CE1_UPS02-CE1_MSB01")
+  2. Equipment identification section or visible labels
+  3. Equipment label in photos
+  4. File name may contain the TAG in parentheses
+  The TAG typically follows a pattern like: SITE_EQUIPMENT-SITE_DESTINATION (e.g., "CE1_UPS02-CE1_MSB01")
 - Equipment type (PANEL, UPS, ATS, GEN, XFMR)
 - Component identification (breaker number, connection point, etc.)
+- Site ID (e.g., "CPQ11-COLO3" from "CPQ11-COLO3-CE1-27")
 
 ## Hotspot Detection
 For each abnormal temperature detected:

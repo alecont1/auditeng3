@@ -104,11 +104,15 @@ class ValidationOrchestrator:
 
         # Apply instrument serial validation for all test types (except FAT)
         # Per CAL-03: Serial instrumento != serial certificado = CRITICAL
-        if certificate_ocr and not isinstance(extraction, FATExtractionResult):
-            serial_result = self.instrument_serial_validator.validate(
-                extraction, certificate_ocr=certificate_ocr
-            )
-            all_findings.extend(serial_result.findings)
+        # Validates ALL equipment: camera, hygrometer, instrument
+        if not isinstance(extraction, FATExtractionResult):
+            if certificate_ocr or hygrometer_ocr:
+                serial_result = self.instrument_serial_validator.validate(
+                    extraction,
+                    certificate_ocr=certificate_ocr,
+                    hygrometer_ocr=hygrometer_ocr,
+                )
+                all_findings.extend(serial_result.findings)
 
         # Apply complementary validations (for thermography only)
         if isinstance(extraction, ThermographyExtractionResult):

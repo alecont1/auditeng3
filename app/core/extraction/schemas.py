@@ -86,11 +86,12 @@ class EquipmentInfo(BaseModel):
     Common across all test types - identifies the equipment being tested.
 
     Attributes:
-        equipment_tag: Equipment TAG/ID with confidence.
+        equipment_tag: Equipment TAG/ID with confidence (MANDATORY for dashboard).
         serial_number: Equipment serial number with confidence.
         equipment_type: Type of equipment (PANEL, UPS, ATS, GEN, XFMR).
         manufacturer: Equipment manufacturer.
         model: Equipment model number/name.
+        site_id: Site identifier (e.g., "CPQ11-COLO3" from report title).
     """
 
     equipment_tag: FieldConfidence
@@ -98,6 +99,7 @@ class EquipmentInfo(BaseModel):
     equipment_type: FieldConfidence
     manufacturer: FieldConfidence | None = None
     model: FieldConfidence | None = None
+    site_id: FieldConfidence | None = None
 
 
 class CalibrationInfo(BaseModel):

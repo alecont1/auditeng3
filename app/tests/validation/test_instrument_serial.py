@@ -1,7 +1,11 @@
 """Tests for InstrumentSerialValidator.
 
-Tests CALIB-007: Instrument serial number must match calibration certificate.
-This validation applies to ALL test types (grounding, megger, thermography).
+Tests:
+- CALIB-007: Instrument serial number must match calibration certificate.
+- CALIB-008: Hygrometer serial number must match photo.
+
+This validation applies to ALL test types (grounding, megger, thermography)
+and validates ALL equipment used in each test type.
 """
 
 import pytest
@@ -14,7 +18,7 @@ from app.core.extraction.megger import (
     MeggerExtractionResult,
     MeggerTestConditions,
 )
-from app.core.extraction.ocr import CertificateOCRResult
+from app.core.extraction.ocr import CertificateOCRResult, HygrometerOCRResult
 from app.core.extraction.schemas import (
     CalibrationInfo,
     EquipmentInfo,
@@ -269,3 +273,198 @@ class TestOrchestratorIntegration:
 
         serial_findings = [f for f in result.findings if f.rule_id == "CALIB-007"]
         assert len(serial_findings) == 0
+
+
+class TestHygrometerSerialValidation:
+    """Tests for thermo-hygrometer serial validation (CALIB-008)."""
+
+    @pytest.fixture
+    def validator(self) -> InstrumentSerialValidator:
+        return InstrumentSerialValidator()
+
+    @pytest.fixture
+    def thermography_with_hygrometer(self) -> ThermographyExtractionResult:
+        """Thermography extraction with camera and hygrometer serials."""
+        return ThermographyExtractionResult(
+            equipment=EquipmentInfo(
+                equipment_tag=FieldConfidence(value="SB-001", confidence=0.95),
+                equipment_type=FieldConfidence(value="Switchboard", confidence=0.90),
+            ),
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-01-15", confidence=0.95),
+                camera_serial=FieldConfidence(value="CAM12345", confidence=0.95),
+                hygrometer_serial=FieldConfidence(value="HYG98765", confidence=0.95),
+            ),
+            thermal_data=ThermalImageData(),
+            hotspots=[],
+            overall_confidence=0.90,
+        )
+
+    def test_hygrometer_serial_mismatch_detected(
+        self,
+        validator: InstrumentSerialValidator,
+        thermography_with_hygrometer: ThermographyExtractionResult,
+    ) -> None:
+        """Test that hygrometer serial mismatch generates CALIB-008 CRITICAL."""
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM12345", confidence=0.95),
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=25.0, confidence=0.95),
+            serial_number=FieldConfidence(value="HYG00000", confidence=0.95),  # Different!
+        )
+
+        result = validator.validate(
+            thermography_with_hygrometer,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=hygrometer_ocr,
+        )
+
+        # Should have one finding for hygrometer mismatch (camera matches)
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+        assert len(hygrometer_findings) == 1
+        finding = hygrometer_findings[0]
+        assert finding.severity == ValidationSeverity.CRITICAL
+        assert "HYG98765" in finding.message
+        assert "HYG00000" in finding.message
+        assert "Thermo-Hygrometer" in finding.message
+
+    def test_hygrometer_serial_match_no_finding(
+        self,
+        validator: InstrumentSerialValidator,
+        thermography_with_hygrometer: ThermographyExtractionResult,
+    ) -> None:
+        """Test that no finding when hygrometer serial matches."""
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM12345", confidence=0.95),
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=25.0, confidence=0.95),
+            serial_number=FieldConfidence(value="HYG98765", confidence=0.95),  # Matches!
+        )
+
+        result = validator.validate(
+            thermography_with_hygrometer,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=hygrometer_ocr,
+        )
+
+        # No hygrometer mismatch findings
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+        assert len(hygrometer_findings) == 0
+
+    def test_both_camera_and_hygrometer_mismatch(
+        self,
+        validator: InstrumentSerialValidator,
+        thermography_with_hygrometer: ThermographyExtractionResult,
+    ) -> None:
+        """Test that both camera and hygrometer mismatches are detected."""
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM_WRONG", confidence=0.95),
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=25.0, confidence=0.95),
+            serial_number=FieldConfidence(value="HYG_WRONG", confidence=0.95),
+        )
+
+        result = validator.validate(
+            thermography_with_hygrometer,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=hygrometer_ocr,
+        )
+
+        # Should have TWO findings: one for camera, one for hygrometer
+        camera_findings = [f for f in result.findings if f.rule_id == "CALIB-007"]
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+
+        assert len(camera_findings) == 1
+        assert len(hygrometer_findings) == 1
+        assert camera_findings[0].severity == ValidationSeverity.CRITICAL
+        assert hygrometer_findings[0].severity == ValidationSeverity.CRITICAL
+
+    def test_no_hygrometer_ocr_skips_validation(
+        self,
+        validator: InstrumentSerialValidator,
+        thermography_with_hygrometer: ThermographyExtractionResult,
+    ) -> None:
+        """Test that hygrometer validation is skipped without OCR."""
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM12345", confidence=0.95),
+        )
+
+        result = validator.validate(
+            thermography_with_hygrometer,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=None,  # No hygrometer OCR
+        )
+
+        # No hygrometer findings (only camera validation runs)
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+        assert len(hygrometer_findings) == 0
+
+    def test_hygrometer_ocr_without_serial_skips_validation(
+        self,
+        validator: InstrumentSerialValidator,
+        thermography_with_hygrometer: ThermographyExtractionResult,
+    ) -> None:
+        """Test that validation is skipped when OCR has no serial."""
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM12345", confidence=0.95),
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=25.0, confidence=0.95),
+            serial_number=None,  # No serial extracted
+        )
+
+        result = validator.validate(
+            thermography_with_hygrometer,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=hygrometer_ocr,
+        )
+
+        # No hygrometer findings
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+        assert len(hygrometer_findings) == 0
+
+
+class TestOrchestratorMultiEquipmentValidation:
+    """Tests for orchestrator integration with multiple equipment validation."""
+
+    def test_orchestrator_validates_hygrometer_for_thermography(self) -> None:
+        """Test orchestrator validates hygrometer serial for thermography."""
+        from app.core.validation.orchestrator import ValidationOrchestrator
+
+        extraction = ThermographyExtractionResult(
+            equipment=EquipmentInfo(
+                equipment_tag=FieldConfidence(value="SB-001", confidence=0.95),
+                equipment_type=FieldConfidence(value="Switchboard", confidence=0.90),
+            ),
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-01-15", confidence=0.95),
+                camera_serial=FieldConfidence(value="CAM12345", confidence=0.95),
+                hygrometer_serial=FieldConfidence(value="HYG98765", confidence=0.95),
+            ),
+            thermal_data=ThermalImageData(),
+            hotspots=[],
+            overall_confidence=0.90,
+        )
+
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="CAM12345", confidence=0.95),
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=25.0, confidence=0.95),
+            serial_number=FieldConfidence(value="HYG_WRONG", confidence=0.95),
+        )
+
+        orchestrator = ValidationOrchestrator()
+        result = orchestrator.validate(
+            extraction,
+            certificate_ocr=certificate_ocr,
+            hygrometer_ocr=hygrometer_ocr,
+        )
+
+        # Should have hygrometer mismatch finding
+        hygrometer_findings = [f for f in result.findings if f.rule_id == "CALIB-008"]
+        assert len(hygrometer_findings) == 1
+        assert hygrometer_findings[0].severity == ValidationSeverity.CRITICAL

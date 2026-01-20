@@ -8,12 +8,18 @@ MEGGER_EXTRACTION_PROMPT = """You are an expert electrical engineer extracting d
 
 Extract the following information with high accuracy:
 
-## Equipment Information
-- Equipment TAG (identifier)
+## Equipment Information (CRITICAL - Required for dashboard)
+- Equipment TAG (MANDATORY - look for it in these locations, in order of priority):
+  1. Report title/header (e.g., "CPQ11-COLO3-CE1-27(CE1_UPS02-CE1_MSB01)" → TAG = "CE1_UPS02-CE1_MSB01")
+  2. Equipment identification section
+  3. Equipment label in photos
+  4. File name may contain the TAG in parentheses
+  The TAG typically follows a pattern like: SITE_EQUIPMENT-SITE_DESTINATION (e.g., "CE1_UPS02-CE1_MSB01")
 - Serial number
 - Equipment type (e.g., MOTOR, TRANSFORMER, CABLE, SWITCHGEAR)
 - Manufacturer and model
 - Rated voltage
+- Site ID (e.g., "CPQ11-COLO3" from "CPQ11-COLO3-CE1-27")
 
 ## Calibration Information (CRITICAL)
 - Calibration certificate number

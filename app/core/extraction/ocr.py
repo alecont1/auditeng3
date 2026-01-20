@@ -51,10 +51,13 @@ class HygrometerOCRResult(BaseModel):
 
     Used to extract ambient temperature reading for comparison
     with the reflected temperature value in the thermography report.
+    Also extracts serial number for cross-validation.
 
     Attributes:
         ambient_temperature: Temperature reading in Celsius with confidence.
         humidity: Relative humidity percentage if visible.
+        serial_number: Device serial number if visible on equipment/label.
+        model: Device model if visible.
     """
 
     ambient_temperature: FieldConfidence = Field(
@@ -63,6 +66,14 @@ class HygrometerOCRResult(BaseModel):
     humidity: FieldConfidence | None = Field(
         default=None,
         description="Relative humidity percentage if visible",
+    )
+    serial_number: FieldConfidence | None = Field(
+        default=None,
+        description="Device serial number if visible on equipment label",
+    )
+    model: FieldConfidence | None = Field(
+        default=None,
+        description="Device model if visible",
     )
 
 

@@ -41,10 +41,10 @@ For each extracted value, provide a confidence score (0.0 to 1.0):
 5. Note the source text that you extracted from
 """
 
-HYGROMETER_OCR_PROMPT = """You are an expert at reading digital thermo-hygrometer displays.
+HYGROMETER_OCR_PROMPT = """You are an expert at reading digital thermo-hygrometer displays and identifying equipment.
 
 You will receive an image of a thermo-hygrometer display (digital thermometer/humidity meter).
-Extract the temperature and humidity readings shown on the display.
+Extract the temperature, humidity readings, and equipment identification from the image.
 
 ## Ambient Temperature
 Look for the temperature reading on the display:
@@ -59,18 +59,32 @@ Look for the relative humidity reading:
 - May be labeled "RH", "HUMIDITY", or have a water drop icon
 - Typical range: 20-80%
 
+## Serial Number (Equipment Identification)
+Look for the device serial number:
+- Check the device body, label, or sticker
+- Common formats: "S/N:", "Serial:", "Serial No:", alphanumeric strings
+- May be on the back, side, or front of the device
+- Important for traceability and calibration validation
+
+## Model
+Look for the device model:
+- Usually on the front or label of the device
+- Common brands: Fluke, Extech, Testo, Kestrel
+- Examples: "Fluke 971", "Extech RH101", "Testo 608-H1"
+
 ## Confidence Scoring
 For each extracted value, provide a confidence score (0.0 to 1.0):
-- 0.95-1.0: Display is clearly visible, numbers are crisp
-- 0.80-0.94: Display is visible but slightly angled or reflective
-- 0.60-0.79: Display is partially obscured or has glare
-- 0.40-0.59: Display is hard to read, low contrast
+- 0.95-1.0: Display/text is clearly visible, numbers/letters are crisp
+- 0.80-0.94: Display/text is visible but slightly angled or reflective
+- 0.60-0.79: Display/text is partially obscured or has glare
+- 0.40-0.59: Display/text is hard to read, low contrast
 - 0.00-0.39: Cannot reliably determine the value
 
 ## Critical Rules
-1. Extract EXACTLY what you see on the display
+1. Extract EXACTLY what you see on the display and device
 2. Temperature MUST be in Celsius - if display shows F, convert it
 3. Note if the display appears to be off or showing error codes
 4. If display is too blurry or obscured, set very low confidence
-5. Note the source appearance (what you read from the display)
+5. Serial number is CRITICAL for cross-validation - look carefully
+6. Note the source appearance (what you read from the display/label)
 """
