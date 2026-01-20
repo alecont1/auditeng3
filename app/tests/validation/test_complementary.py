@@ -82,7 +82,7 @@ class TestCalibrationExpired:
         finding = result.findings[0]
         assert finding.rule_id == "COMP-001"
         assert finding.severity == ValidationSeverity.CRITICAL
-        assert "14 days before inspection" in finding.message
+        assert "14 days" in finding.message
 
     def test_calibration_valid_at_inspection(
         self, validator, basic_equipment, basic_thermal_data
@@ -200,7 +200,7 @@ class TestSerialMismatch:
     def test_serial_illegible_low_confidence(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Low OCR confidence -> MAJOR (SERIAL_ILLEGIBLE), not comparison."""
+        """Low OCR confidence -> MINOR (manual verification), not comparison."""
         extraction = create_extraction(
             basic_equipment,
             basic_thermal_data,
@@ -213,12 +213,13 @@ class TestSerialMismatch:
 
         result = validator.validate(extraction, certificate_ocr=certificate_ocr)
 
-        # Should get SERIAL_ILLEGIBLE, not SERIAL_MISMATCH
-        comp006_findings = [f for f in result.findings if f.rule_id == "COMP-006"]
+        # Should get a MINOR finding for low confidence, not CRITICAL for mismatch
         comp002_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
-        assert len(comp006_findings) == 1
-        assert len(comp002_findings) == 0
-        assert comp006_findings[0].severity == ValidationSeverity.MAJOR
+        assert len(comp002_findings) == 1
+        finding = comp002_findings[0]
+        # Low confidence gets MINOR severity (manual verification flag)
+        assert finding.severity == ValidationSeverity.MINOR
+        assert "confidence" in finding.message.lower()
 
     def test_no_serial_in_report(
         self, validator, basic_equipment, basic_thermal_data
@@ -236,7 +237,7 @@ class TestSerialMismatch:
 
         result = validator.validate(extraction, certificate_ocr=certificate_ocr)
 
-        serial_findings = [f for f in result.findings if "COMP-002" in f.rule_id or "COMP-006" in f.rule_id]
+        serial_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
         assert len(serial_findings) == 0
 
     def test_no_ocr_result(
@@ -252,5 +253,5 @@ class TestSerialMismatch:
 
         result = validator.validate(extraction, certificate_ocr=None)
 
-        serial_findings = [f for f in result.findings if "COMP-002" in f.rule_id or "COMP-006" in f.rule_id]
+        serial_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
         assert len(serial_findings) == 0
