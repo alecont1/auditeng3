@@ -1,6 +1,7 @@
 """Tests for ValidationOrchestrator."""
 
 import pytest
+from app.core.extraction.ocr import CertificateOCRResult
 from app.core.extraction.schemas import EquipmentInfo, FieldConfidence, CalibrationInfo
 from app.core.extraction.grounding import (
     GroundingExtractionResult,
@@ -302,3 +303,87 @@ class TestCrossValidation:
         # Should have cross-field finding for missing TAG
         cross_findings = [f for f in result.findings if "CROSS" in f.rule_id]
         assert len(cross_findings) >= 1
+
+
+class TestComplementaryIntegration:
+    """Test ComplementaryValidator integration in orchestrator."""
+
+    def test_orchestrator_runs_complementary_validator(self):
+        """Verify orchestrator runs complementary validation for thermography."""
+        orchestrator = ValidationOrchestrator()
+
+        # Create extraction with expired calibration
+        extraction = ThermographyExtractionResult(
+            equipment=EquipmentInfo(
+                equipment_tag=FieldConfidence(value="QD-01", confidence=0.9),
+                equipment_type=FieldConfidence(value="panel", confidence=0.9),
+            ),
+            calibration=CalibrationInfo(
+                expiration_date=FieldConfidence(value="2024-01-01", confidence=0.9),
+            ),
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=ThermalImageData(),
+            hotspots=[],
+            overall_confidence=0.9,
+        )
+
+        result = orchestrator.validate(extraction)
+
+        # Should have COMP-001 finding from complementary validator
+        comp_findings = [f for f in result.findings if f.rule_id.startswith("COMP-")]
+        assert len(comp_findings) >= 1
+        assert any(f.rule_id == "COMP-001" for f in comp_findings)
+
+    def test_orchestrator_passes_ocr_to_complementary(self):
+        """Verify orchestrator passes OCR data to complementary validator."""
+        orchestrator = ValidationOrchestrator()
+
+        extraction = ThermographyExtractionResult(
+            equipment=EquipmentInfo(
+                equipment_tag=FieldConfidence(value="QD-01", confidence=0.9),
+                equipment_type=FieldConfidence(value="panel", confidence=0.9),
+            ),
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+                camera_serial=FieldConfidence(value="ABC123", confidence=0.9),
+            ),
+            thermal_data=ThermalImageData(),
+            hotspots=[],
+            overall_confidence=0.9,
+        )
+
+        # Pass OCR with mismatching serial
+        certificate_ocr = CertificateOCRResult(
+            serial_number=FieldConfidence(value="XYZ789", confidence=0.95),
+        )
+
+        result = orchestrator.validate(extraction, certificate_ocr=certificate_ocr)
+
+        # Should have COMP-002 finding for serial mismatch
+        comp_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
+        assert len(comp_findings) == 1
+
+    def test_orchestrator_without_ocr_still_works(self):
+        """Verify orchestrator works when no OCR data provided."""
+        orchestrator = ValidationOrchestrator()
+
+        extraction = ThermographyExtractionResult(
+            equipment=EquipmentInfo(
+                equipment_tag=FieldConfidence(value="QD-01", confidence=0.9),
+                equipment_type=FieldConfidence(value="panel", confidence=0.9),
+            ),
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=ThermalImageData(),
+            hotspots=[],
+            overall_confidence=0.9,
+        )
+
+        # No OCR data - should still validate without errors
+        result = orchestrator.validate(extraction)
+
+        assert result is not None
+        assert isinstance(result.findings, list)
