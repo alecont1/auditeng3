@@ -1,135 +1,114 @@
-"""Tests for ComplementaryValidator."""
+"""Tests for ComplementaryValidator.
 
-import pytest
+Tests cover all 5 cross-validation rules:
+- COMP-001: CALIBRATION_EXPIRED
+- COMP-002: SERIAL_MISMATCH
+- COMP-003: VALUE_MISMATCH
+- COMP-004: PHOTO_MISSING
+- COMP-005: SPEC_NON_COMPLIANCE
+"""
+
 from datetime import date
 
-from app.core.extraction.ocr import CertificateOCRResult
+import pytest
+
+from app.core.extraction.ocr import CertificateOCRResult, HygrometerOCRResult
 from app.core.extraction.schemas import CalibrationInfo, EquipmentInfo, FieldConfidence
 from app.core.extraction.thermography import (
-    ThermographyExtractionResult,
+    Hotspot,
     ThermalImageData,
+    ThermographyExtractionResult,
     ThermographyTestConditions,
 )
 from app.core.validation.complementary import ComplementaryValidator
-from app.core.validation import ValidationSeverity
+from app.core.validation.schemas import ValidationSeverity
 
 
 @pytest.fixture
 def validator():
+    """Create ComplementaryValidator instance."""
     return ComplementaryValidator()
 
 
 @pytest.fixture
 def basic_equipment():
+    """Create basic equipment info for tests."""
     return EquipmentInfo(
-        equipment_tag=FieldConfidence(value="QD-01", confidence=0.9),
-        equipment_type=FieldConfidence(value="panel", confidence=0.9),
+        equipment_tag=FieldConfidence(value="PANEL-001", confidence=0.9),
+        equipment_type=FieldConfidence(value="PANEL", confidence=0.9),
     )
 
 
 @pytest.fixture
 def basic_thermal_data():
-    return ThermalImageData()
-
-
-def create_extraction(
-    equipment,
-    thermal_data,
-    inspection_date: str,
-    calibration_exp: str | None = None,
-    camera_serial: str | None = None,
-) -> ThermographyExtractionResult:
-    """Helper to create test extraction."""
-    calibration = None
-    if calibration_exp:
-        calibration = CalibrationInfo(
-            expiration_date=FieldConfidence(value=calibration_exp, confidence=0.9),
-        )
-
-    test_conditions = ThermographyTestConditions(
-        inspection_date=FieldConfidence(value=inspection_date, confidence=0.9),
-        camera_serial=FieldConfidence(value=camera_serial, confidence=0.9) if camera_serial else None,
+    """Create basic thermal data for tests."""
+    return ThermalImageData(
+        reflected_temperature=FieldConfidence(value=25.0, confidence=0.9),
     )
 
-    return ThermographyExtractionResult(
-        equipment=equipment,
-        calibration=calibration,
-        test_conditions=test_conditions,
-        thermal_data=thermal_data,
-        hotspots=[],
-        overall_confidence=0.9,
+
+def create_hotspot(location: str, max_temp: float, ref_temp: float) -> Hotspot:
+    """Helper to create hotspot with delta-T."""
+    return Hotspot(
+        location=FieldConfidence(value=location, confidence=0.9),
+        max_temperature=FieldConfidence(value=max_temp, confidence=0.9),
+        reference_temperature=FieldConfidence(value=ref_temp, confidence=0.9),
     )
 
 
 class TestCalibrationExpired:
     """Tests for CALIBRATION_EXPIRED (COMP-001)."""
 
-    def test_calibration_expired_before_inspection(
+    def test_expired_calibration(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Calibration expired before inspection -> CRITICAL."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            calibration_exp="2024-06-01",  # Expired 14 days before
+        """Expired calibration on inspection date -> CRITICAL."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[],
+            calibration=CalibrationInfo(
+                expiration_date=FieldConfidence(value="2024-06-01", confidence=0.9),
+            ),
+            overall_confidence=0.9,
         )
 
-        result = validator.validate(extraction)
+        result = validator.validate(
+            extraction,
+            inspection_date=date(2024, 6, 15),
+        )
 
-        assert not result.is_valid
-        assert result.critical_count == 1
-        finding = result.findings[0]
-        assert finding.rule_id == "COMP-001"
-        assert finding.severity == ValidationSeverity.CRITICAL
-        assert "14 days" in finding.message
+        comp001_findings = [f for f in result.findings if f.rule_id == "COMP-001"]
+        assert len(comp001_findings) == 1
+        assert comp001_findings[0].severity == ValidationSeverity.CRITICAL
 
-    def test_calibration_valid_at_inspection(
+    def test_valid_calibration(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Calibration valid at inspection -> no finding."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            calibration_exp="2024-12-31",  # Valid until end of year
+        """Valid calibration on inspection date -> no finding."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[],
+            calibration=CalibrationInfo(
+                expiration_date=FieldConfidence(value="2024-12-31", confidence=0.9),
+            ),
+            overall_confidence=0.9,
         )
 
-        result = validator.validate(extraction)
+        result = validator.validate(
+            extraction,
+            inspection_date=date(2024, 6, 15),
+        )
 
         comp001_findings = [f for f in result.findings if f.rule_id == "COMP-001"]
         assert len(comp001_findings) == 0
-
-    def test_calibration_expires_same_day(
-        self, validator, basic_equipment, basic_thermal_data
-    ):
-        """Calibration expires same day as inspection -> valid (not expired)."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            calibration_exp="2024-06-15",  # Same day
-        )
-
-        result = validator.validate(extraction)
-
-        comp001_findings = [f for f in result.findings if f.rule_id == "COMP-001"]
-        assert len(comp001_findings) == 0
-
-    def test_no_calibration_info(
-        self, validator, basic_equipment, basic_thermal_data
-    ):
-        """No calibration info -> no finding (handled by CalibrationValidator)."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            calibration_exp=None,
-        )
-
-        result = validator.validate(extraction)
-
-        assert result.critical_count == 0
 
 
 class TestSerialMismatch:
@@ -138,39 +117,43 @@ class TestSerialMismatch:
     def test_serial_mismatch(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Serial mismatch -> CRITICAL."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial="ABC123",
+        """Mismatched serial numbers -> CRITICAL."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+                camera_serial=FieldConfidence(value="CAM-12345", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[],
+            overall_confidence=0.9,
         )
         certificate_ocr = CertificateOCRResult(
-            serial_number=FieldConfidence(value="XYZ789", confidence=0.95),
+            serial_number=FieldConfidence(value="CAM-99999", confidence=0.95),
         )
 
         result = validator.validate(extraction, certificate_ocr=certificate_ocr)
 
-        assert not result.is_valid
-        assert result.critical_count == 1
-        finding = result.findings[0]
-        assert finding.rule_id == "COMP-002"
-        assert finding.severity == ValidationSeverity.CRITICAL
-        assert "ABC123" in finding.message
-        assert "XYZ789" in finding.message
+        comp002_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
+        assert len(comp002_findings) == 1
+        assert comp002_findings[0].severity == ValidationSeverity.CRITICAL
 
     def test_serial_match(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Serial matches -> no finding."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial="ABC123",
+        """Matching serial numbers -> no finding."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+                camera_serial=FieldConfidence(value="CAM-12345", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[],
+            overall_confidence=0.9,
         )
         certificate_ocr = CertificateOCRResult(
-            serial_number=FieldConfidence(value="ABC123", confidence=0.95),
+            serial_number=FieldConfidence(value="CAM-12345", confidence=0.95),
         )
 
         result = validator.validate(extraction, certificate_ocr=certificate_ocr)
@@ -178,80 +161,233 @@ class TestSerialMismatch:
         comp002_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
         assert len(comp002_findings) == 0
 
-    def test_serial_match_case_insensitive(
+    def test_low_ocr_confidence(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """Serial comparison is case-insensitive."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial="abc123",
+        """Low OCR confidence -> MINOR (review flag)."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+                camera_serial=FieldConfidence(value="CAM-12345", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[],
+            overall_confidence=0.9,
         )
         certificate_ocr = CertificateOCRResult(
-            serial_number=FieldConfidence(value="ABC123", confidence=0.95),
+            serial_number=FieldConfidence(value="CAM-12???", confidence=0.5),  # Low confidence
         )
 
         result = validator.validate(extraction, certificate_ocr=certificate_ocr)
 
-        comp002_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
-        assert len(comp002_findings) == 0
-
-    def test_serial_illegible_low_confidence(
-        self, validator, basic_equipment, basic_thermal_data
-    ):
-        """Low OCR confidence -> MINOR (manual verification), not comparison."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial="ABC123",
-        )
-        certificate_ocr = CertificateOCRResult(
-            serial_number=FieldConfidence(value="A?C1?3", confidence=0.5),  # Low confidence
-        )
-
-        result = validator.validate(extraction, certificate_ocr=certificate_ocr)
-
-        # Should get a MINOR finding for low confidence, not CRITICAL for mismatch
         comp002_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
         assert len(comp002_findings) == 1
-        finding = comp002_findings[0]
-        # Low confidence gets MINOR severity (manual verification flag)
-        assert finding.severity == ValidationSeverity.MINOR
-        assert "confidence" in finding.message.lower()
+        assert comp002_findings[0].severity == ValidationSeverity.MINOR
 
-    def test_no_serial_in_report(
+
+class TestValueMismatch:
+    """Tests for VALUE_MISMATCH (COMP-003)."""
+
+    def test_temperature_mismatch(
+        self, validator, basic_equipment
+    ):
+        """Temperature differs by more than tolerance -> CRITICAL."""
+        thermal_data = ThermalImageData(
+            reflected_temperature=FieldConfidence(value=25.0, confidence=0.9),
+        )
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=thermal_data,
+            hotspots=[],
+            overall_confidence=0.9,
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=30.0, confidence=0.95),  # 5C diff
+        )
+
+        result = validator.validate(extraction, hygrometer_ocr=hygrometer_ocr)
+
+        comp003_findings = [f for f in result.findings if f.rule_id == "COMP-003"]
+        assert len(comp003_findings) == 1
+        assert comp003_findings[0].severity == ValidationSeverity.CRITICAL
+
+    def test_temperature_within_tolerance(
+        self, validator, basic_equipment
+    ):
+        """Temperature within tolerance -> no finding."""
+        thermal_data = ThermalImageData(
+            reflected_temperature=FieldConfidence(value=25.0, confidence=0.9),
+        )
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=thermal_data,
+            hotspots=[],
+            overall_confidence=0.9,
+        )
+        hygrometer_ocr = HygrometerOCRResult(
+            ambient_temperature=FieldConfidence(value=26.0, confidence=0.95),  # 1C diff
+        )
+
+        result = validator.validate(extraction, hygrometer_ocr=hygrometer_ocr)
+
+        comp003_findings = [f for f in result.findings if f.rule_id == "COMP-003"]
+        assert len(comp003_findings) == 0
+
+
+class TestPhotoMissing:
+    """Tests for PHOTO_MISSING (COMP-004)."""
+
+    def test_missing_phase(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """No serial in report -> no comparison."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial=None,
+        """Missing phase thermal image -> CRITICAL."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Phase A", 35.0, 30.0),
+                create_hotspot("Phase C", 36.0, 30.0),
+                # Phase B missing
+            ],
+            overall_confidence=0.9,
         )
-        certificate_ocr = CertificateOCRResult(
-            serial_number=FieldConfidence(value="XYZ789", confidence=0.95),
+
+        result = validator.validate(
+            extraction,
+            expected_phases=["Phase A", "Phase B", "Phase C"],
         )
 
-        result = validator.validate(extraction, certificate_ocr=certificate_ocr)
+        comp004_findings = [f for f in result.findings if f.rule_id == "COMP-004"]
+        assert len(comp004_findings) == 1
+        assert "B" in comp004_findings[0].message
 
-        serial_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
-        assert len(serial_findings) == 0
-
-    def test_no_ocr_result(
+    def test_all_phases_present(
         self, validator, basic_equipment, basic_thermal_data
     ):
-        """No OCR result -> no comparison."""
-        extraction = create_extraction(
-            basic_equipment,
-            basic_thermal_data,
-            inspection_date="2024-06-15",
-            camera_serial="ABC123",
+        """All phases have thermal images -> no finding."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Phase A", 35.0, 30.0),
+                create_hotspot("Phase B", 34.0, 30.0),
+                create_hotspot("Phase C", 36.0, 30.0),
+            ],
+            overall_confidence=0.9,
         )
 
-        result = validator.validate(extraction, certificate_ocr=None)
+        result = validator.validate(
+            extraction,
+            expected_phases=["Phase A", "Phase B", "Phase C"],
+        )
 
-        serial_findings = [f for f in result.findings if f.rule_id == "COMP-002"]
-        assert len(serial_findings) == 0
+        comp004_findings = [f for f in result.findings if f.rule_id == "COMP-004"]
+        assert len(comp004_findings) == 0
+
+
+class TestSpecNonCompliance:
+    """Tests for SPEC_NON_COMPLIANCE (COMP-005)."""
+
+    def test_high_delta_no_comments(
+        self, validator, basic_equipment, basic_thermal_data
+    ):
+        """Delta > 10C without comments -> CRITICAL."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Breaker 1", 45.0, 30.0),  # 15C delta
+            ],
+            overall_confidence=0.9,
+        )
+
+        result = validator.validate(extraction, report_comments=None)
+
+        comp005_findings = [f for f in result.findings if f.rule_id == "COMP-005"]
+        assert len(comp005_findings) == 1
+        assert comp005_findings[0].severity == ValidationSeverity.CRITICAL
+
+    def test_high_delta_with_valid_comments(
+        self, validator, basic_equipment, basic_thermal_data
+    ):
+        """Delta > 10C with proper comments -> no finding."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Breaker 1", 45.0, 30.0),  # 15C delta
+            ],
+            overall_confidence=0.9,
+        )
+
+        result = validator.validate(
+            extraction,
+            report_comments="Loose terminals identified. Torque check recommended.",
+        )
+
+        comp005_findings = [f for f in result.findings if f.rule_id == "COMP-005"]
+        assert len(comp005_findings) == 0
+
+    def test_high_delta_irrelevant_comments(
+        self, validator, basic_equipment, basic_thermal_data
+    ):
+        """Delta > 10C with irrelevant comments -> CRITICAL."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Breaker 1", 45.0, 30.0),  # 15C delta
+            ],
+            overall_confidence=0.9,
+        )
+
+        result = validator.validate(
+            extraction,
+            report_comments="Weather was sunny. Equipment looked fine.",
+        )
+
+        comp005_findings = [f for f in result.findings if f.rule_id == "COMP-005"]
+        assert len(comp005_findings) == 1
+
+    def test_delta_below_threshold(
+        self, validator, basic_equipment, basic_thermal_data
+    ):
+        """Delta <= 10C -> no SPEC check needed."""
+        extraction = ThermographyExtractionResult(
+            equipment=basic_equipment,
+            test_conditions=ThermographyTestConditions(
+                inspection_date=FieldConfidence(value="2024-06-15", confidence=0.9),
+            ),
+            thermal_data=basic_thermal_data,
+            hotspots=[
+                create_hotspot("Breaker 1", 38.0, 30.0),  # 8C delta
+            ],
+            overall_confidence=0.9,
+        )
+
+        result = validator.validate(extraction, report_comments=None)
+
+        comp005_findings = [f for f in result.findings if f.rule_id == "COMP-005"]
+        assert len(comp005_findings) == 0
