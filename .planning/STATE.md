@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 ## Current Position
 
 Phase: 16 of 16 (Complementary Validations)
-Plan: 4 of 5 in current phase
-Status: In progress
-Last activity: 2026-01-20 — Completed 16-04-PLAN.md (Remaining Validators)
+Plan: 5 of 5 in current phase
+Status: Phase complete
+Last activity: 2026-01-20 — Completed 16-05-PLAN.md (Worker Integration)
 
-Progress: ████████████████████████░ 24/25 plans (96%)
+Progress: █████████████████████████ 25/25 plans (100%)
 
 ## Milestone v2.0 Overview
 
@@ -34,7 +34,7 @@ Progress: ███████████████████████�
 | 13 | Backend Extensions | 2 | Complete (2/2) |
 | 14 | Polish & Deploy | 3 | Complete (3/3) |
 | 15 | R2 Storage | 1 | Complete (1/1) |
-| 16 | Complementary Validations | 5 | In Progress (4/5) |
+| 16 | Complementary Validations | 5 | Complete (5/5) |
 
 ## Performance Metrics
 
@@ -96,6 +96,8 @@ Progress: ███████████████████████�
 | Phase normalization (A/B/C vs R/S/T) | Supports both international and Brazilian phase designations | 16-04 |
 | OCR confidence threshold 0.7 | Low confidence flags for review but doesn't block mismatch detection | 16-04 |
 | Portuguese SPEC keywords | Required keywords include translations (terminais, isoladores, condutores, torque) | 16-04 |
+| Optional OCR orchestrator params | validate() accepts OCR/comments as optional for backward compat | 16-05 |
+| Benchmark test placeholders | PDF integration tests skipped until fixtures available | 16-05 |
 
 ### API Endpoints (Phase 13 Complete)
 
@@ -111,9 +113,9 @@ All backend extensions for v2.0 are now available:
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 16-04-PLAN.md (Remaining Validators)
+Stopped at: Completed 16-05-PLAN.md (Worker Integration)
 Resume file: None
 
 ## Next Action
 
-Continue with Phase 16 Plan 05 - Worker Integration.
+v2.0 Milestone Complete! All 25 plans across 10 phases finished. Complementary validations integrated into orchestrator.
