@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-17)
 ## Current Position
 
 Phase: 16 of 16 (Complementary Validations)
-Plan: 3 of 5 in current phase
+Plan: 4 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-20 — Completed 16-03-PLAN.md (ComplementaryValidator Implementation)
+Last activity: 2026-01-20 — Completed 16-04-PLAN.md (Remaining Validators)
 
-Progress: ███████████████████████░ 23/25 plans (92%)
+Progress: ████████████████████████░ 24/25 plans (96%)
 
 ## Milestone v2.0 Overview
 
@@ -34,7 +34,7 @@ Progress: ███████████████████████�
 | 13 | Backend Extensions | 2 | Complete (2/2) |
 | 14 | Polish & Deploy | 3 | Complete (3/3) |
 | 15 | R2 Storage | 1 | Complete (1/1) |
-| 16 | Complementary Validations | 5 | In Progress (1/5) |
+| 16 | Complementary Validations | 5 | In Progress (4/5) |
 
 ## Performance Metrics
 
@@ -93,6 +93,9 @@ Progress: ███████████████████████�
 | Separate OCR extraction module | OCR reusable across validation types, maintains extraction/validation separation | 16-01 |
 | FieldConfidence with source_text | Preserves extracted text for auditability and debugging | 16-01 |
 | Explicit confidence tiers in prompts | Helps Claude provide consistent confidence scores (0.95 for clear, etc.) | 16-01 |
+| Phase normalization (A/B/C vs R/S/T) | Supports both international and Brazilian phase designations | 16-04 |
+| OCR confidence threshold 0.7 | Low confidence flags for review but doesn't block mismatch detection | 16-04 |
+| Portuguese SPEC keywords | Required keywords include translations (terminais, isoladores, condutores, torque) | 16-04 |
 
 ### API Endpoints (Phase 13 Complete)
 
@@ -108,9 +111,9 @@ All backend extensions for v2.0 are now available:
 ## Session Continuity
 
 Last session: 2026-01-20
-Stopped at: Completed 16-01-PLAN.md (OCR Extraction Infrastructure)
+Stopped at: Completed 16-04-PLAN.md (Remaining Validators)
 Resume file: None
 
 ## Next Action
 
-Continue with Phase 16 Plan 02 - Ground Truth & Config.
+Continue with Phase 16 Plan 05 - Worker Integration.
