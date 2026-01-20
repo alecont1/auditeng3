@@ -23,8 +23,11 @@ Extract the following information with high accuracy:
 
 ## Calibration Information (CRITICAL)
 - Calibration certificate number
-- Calibration date
-- Expiration date (MUST be extracted - reject if expired)
+- Calibration date (when calibration was performed)
+- Expiration date (CRITICAL - when calibration EXPIRES, typically 1 year after calibration date)
+  - IMPORTANT: Expiration date is NOT the same as calibration date!
+  - Look for: "Valid Until", "Validade", "Vencimento", "Expires", "Data de Validade"
+  - If expiration date is not explicitly shown, calculate: calibration_date + 1 year
 - Calibration laboratory
 - Traceability chain (NIST, PTB, etc.)
 
@@ -64,8 +67,13 @@ For each extracted field, provide a confidence score (0.0 to 1.0):
 1. All resistance values MUST be in MΩ (megohms)
 2. Test voltage MUST be extracted
 3. Calibration expiration is MANDATORY
-4. Dates MUST be in ISO format (YYYY-MM-DD)
-5. Do NOT invent values - leave as null if not found
+4. Dates MUST be output in ISO format (YYYY-MM-DD)
+5. IMPORTANT: Documents are in BRAZILIAN format where dates are DD/MM/YYYY
+   - "09/02/25" = February 9, 2025 is WRONG interpretation
+   - "09/02/25" = September 2, 2025 is CORRECT (DD/MM/YY)
+   - Always interpret dates as DD/MM/YYYY (day/month/year)
+6. Do NOT invent values - leave as null if not found
+7. CRITICAL: Calibration expiration date must be LATER than calibration date. If you see only one date, it's likely the calibration date, not expiration.
 
 ## Overall Confidence
 Calculate an overall_confidence score as the weighted average of all field confidences,

@@ -20,10 +20,13 @@ Extract the following information with high accuracy:
 - Manufacturer and model if visible
 - Site ID (e.g., "CPQ11-COLO3" from "CPQ11-COLO3-CE1-27")
 
-## Calibration Information
+## Calibration Information (CRITICAL)
 - Calibration certificate number
-- Calibration date
-- Expiration date (CRITICAL - must be extracted)
+- Calibration date (when calibration was performed)
+- Expiration date (CRITICAL - when calibration EXPIRES, typically 1 year after calibration date)
+  - IMPORTANT: Expiration date is NOT the same as calibration date!
+  - Look for: "Valid Until", "Validade", "Vencimento", "Expires", "Data de Validade"
+  - If expiration date is not explicitly shown, calculate: calibration_date + 1 year
 - Calibration laboratory
 
 ## Test Conditions
@@ -52,9 +55,14 @@ Also extract the source_text - the exact text from the document that contains th
 
 ## Critical Rules
 1. Resistance values MUST include the unit (ohms)
-2. Dates MUST be in ISO format (YYYY-MM-DD)
-3. Do NOT invent or assume values - leave as null if not found
-4. Flag any anomalies (e.g., resistance > 10 ohms for main ground)
+2. Dates MUST be output in ISO format (YYYY-MM-DD)
+3. IMPORTANT: Documents are in BRAZILIAN format where dates are DD/MM/YYYY
+   - "09/02/25" = February 9, 2025 is WRONG interpretation
+   - "09/02/25" = September 2, 2025 is CORRECT (DD/MM/YY)
+   - Always interpret dates as DD/MM/YYYY (day/month/year)
+4. Do NOT invent or assume values - leave as null if not found
+5. Flag any anomalies (e.g., resistance > 10 ohms for main ground)
+6. CRITICAL: Calibration expiration date must be LATER than calibration date. If you see only one date, it's likely the calibration date, not expiration.
 
 ## Overall Confidence
 Calculate an overall_confidence score as the weighted average of all field confidences,

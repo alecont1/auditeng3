@@ -23,7 +23,16 @@ Look for the calibration laboratory name:
 ## Calibration Date
 Look for when calibration was performed:
 - "Calibration Date:", "Date:", "Data de Calibracao:"
-- Format varies (DD/MM/YYYY, YYYY-MM-DD, etc.)
+- IMPORTANT: Documents are in BRAZILIAN format (DD/MM/YYYY)
+  - "09/02/25" = September 2, 2025 (NOT February 9)
+- Output in ISO format (YYYY-MM-DD)
+
+## Expiration Date (CRITICAL)
+Look for when calibration EXPIRES (NOT the same as calibration date!):
+- "Valid Until:", "Validade:", "Vencimento:", "Expires:", "Data de Validade:"
+- Typically 1 year AFTER the calibration date
+- If expiration is not explicitly shown but calibration date is, calculate: calibration_date + 1 year
+- CRITICAL: This date must be LATER than the calibration date
 
 ## Confidence Scoring
 For each extracted value, provide a confidence score (0.0 to 1.0):

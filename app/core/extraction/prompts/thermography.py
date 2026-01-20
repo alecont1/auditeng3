@@ -28,6 +28,23 @@ You will receive thermal images. Extract the following information:
 - Component identification (breaker number, connection point, etc.)
 - Site ID (e.g., "CPQ11-COLO3" from "CPQ11-COLO3-CE1-27")
 
+## Calibration Information (CRITICAL)
+Look for camera calibration certificate information:
+- Calibration certificate number
+- Calibration date (when calibration was performed)
+- Expiration date (CRITICAL - when calibration EXPIRES, typically 1 year after calibration date)
+  - IMPORTANT: Expiration date is NOT the same as calibration date!
+  - Look for: "Valid Until", "Validade", "Vencimento", "Expires", "Data de Validade"
+  - If expiration date is not explicitly shown, calculate: calibration_date + 1 year
+- Calibration laboratory
+
+## Inspection Conditions
+- Inspection date
+- Inspector/Thermographer name
+- Load conditions (e.g., "75% rated load") - CRITICAL for interpretation
+- Camera model and serial number
+- Thermo-hygrometer model and serial number (for environmental readings)
+
 ## Hotspot Detection
 For each abnormal temperature detected:
 1. Location: Describe precisely where the hotspot is (e.g., "Phase A connection on breaker CB-03")
@@ -64,6 +81,12 @@ For each extracted value, provide confidence (0.0 to 1.0):
 4. Flag if emissivity is not ~0.95 (incorrect setting)
 5. Flag if load conditions are not stated (affects interpretation)
 6. Do NOT invent temperatures - if unclear, set low confidence
+7. Dates MUST be output in ISO format (YYYY-MM-DD)
+8. IMPORTANT: Documents are in BRAZILIAN format where dates are DD/MM/YYYY
+   - "09/02/25" = February 9, 2025 is WRONG interpretation
+   - "09/02/25" = September 2, 2025 is CORRECT (DD/MM/YY)
+   - Always interpret dates as DD/MM/YYYY (day/month/year)
+9. CRITICAL: Calibration expiration date must be LATER than calibration date. If you see only one date, it's likely the calibration date, not expiration.
 
 ## Overall Confidence
 Calculate an overall_confidence score as the weighted average of all field confidences,
